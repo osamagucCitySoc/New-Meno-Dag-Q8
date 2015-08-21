@@ -70,6 +70,7 @@
 		E80477CC1B874EBD0041B71A /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80477CB1B874EBD0041B71A /* iAd.framework */; };
 		E80477CE1B874EC10041B71A /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80477CD1B874EC10041B71A /* AdSupport.framework */; };
 		E80477D01B874EC50041B71A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80477CF1B874EC50041B71A /* StoreKit.framework */; };
+		E80477D31B87531B0041B71A /* UICKeyChainStore.m in Sources */ = {isa = PBXBuildFile; fileRef = E80477D21B87531B0041B71A /* UICKeyChainStore.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -155,6 +156,8 @@
 		E80477CB1B874EBD0041B71A /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		E80477CD1B874EC10041B71A /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 		E80477CF1B874EC50041B71A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		E80477D11B87531B0041B71A /* UICKeyChainStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICKeyChainStore.h; sourceTree = "<group>"; };
+		E80477D21B87531B0041B71A /* UICKeyChainStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICKeyChainStore.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +225,8 @@
 		1E9D7A021B7F320B001C44C9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				E80477D11B87531B0041B71A /* UICKeyChainStore.h */,
+				E80477D21B87531B0041B71A /* UICKeyChainStore.m */,
 				1E9D7A031B7F320B001C44C9 /* Info.plist */,
 				1E9D7A041B7F320B001C44C9 /* main.m */,
 			);
@@ -475,6 +480,7 @@
 				1E9D7AA21B8493D2001C44C9 /* ServicesViewController.m in Sources */,
 				1E9D7A051B7F320B001C44C9 /* main.m in Sources */,
 				E80477CA1B874C380041B71A /* IAPHelper.m in Sources */,
+				E80477D31B87531B0041B71A /* UICKeyChainStore.m in Sources */,
 				E80477C91B874C380041B71A /* followersExchangePurchase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

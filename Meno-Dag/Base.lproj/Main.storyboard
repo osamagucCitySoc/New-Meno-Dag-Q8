@@ -611,6 +611,9 @@
                                             <color key="titleColor" white="0.37078010950000001" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="blockClicked:" destination="RRX-R9-sUA" eventType="touchUpInside" id="rKS-t6-80Q"/>
+                                        </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="X81-pz-RrT">
                                         <rect key="frame" x="59" y="186" width="68" height="21"/>
@@ -627,6 +630,9 @@
                                             <color key="titleColor" white="0.37078010950000001" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="nameClicked:" destination="RRX-R9-sUA" eventType="touchUpInside" id="x1L-k9-j0d"/>
+                                        </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="L1y-MT-Apl">
                                         <rect key="frame" x="60" y="407" width="68" height="21"/>
@@ -643,6 +649,9 @@
                                             <color key="titleColor" white="0.37078010950000001" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="partClicked:" destination="RRX-R9-sUA" eventType="touchUpInside" id="Xv5-C7-Zj6"/>
+                                        </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="eZm-Qt-eym">
                                         <rect key="frame" x="59" y="620" width="68" height="21"/>
@@ -658,6 +667,11 @@
                                         <color key="textColor" red="0.14509803921568626" green="0.14509803921568626" blue="0.14509803921568626" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="white" id="6Fo-eb-tOg">
+                                        <rect key="frame" x="19" y="8" width="20" height="20"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="color" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                    </activityIndicatorView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             </scrollView>
@@ -675,6 +689,7 @@
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
                     <connections>
                         <outlet property="blockPriceText" destination="X81-pz-RrT" id="IkL-Ls-U46"/>
+                        <outlet property="loader" destination="6Fo-eb-tOg" id="zh0-H0-Gd3"/>
                         <outlet property="namePriceText" destination="L1y-MT-Apl" id="Wzl-aw-Le2"/>
                         <outlet property="partPriceText" destination="eZm-Qt-eym" id="fNf-4k-0mD"/>
                         <outlet property="scrollView" destination="0ck-Um-jnt" id="LMA-vy-X4B"/>

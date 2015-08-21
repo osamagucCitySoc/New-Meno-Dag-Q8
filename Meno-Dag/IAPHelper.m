@@ -7,6 +7,7 @@
 //
 
 #import "IAPHelper.h"
+#import "UICKeyChainStore.h"
 
 @interface IAPHelper () <SKProductsRequestDelegate,SKPaymentTransactionObserver>
 @end
@@ -43,13 +44,27 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
                 NSString* ss = (NSString*)[NSString stringWithFormat:@"%@",productIdentifier];
                 if([ss rangeOfString:@"11"].location != NSNotFound)
                 {
-                    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"phonePartSearch"];
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    
+                    @try
+                    {
+                        [store setString:@"YES" forKey:@"phonePartSearch"];
+                    } @catch (NSException *exception) {
+                        [store setString:@"YES" forKey:@"phonePartSearch"];
+                    }
+                    [store synchronize];
+
                 }else if([ss rangeOfString:@"22"].location != NSNotFound)
                 {
-                    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"nameSearch"];
-                }else if([ss rangeOfString:@"33"].location != NSNotFound)
-                {
-                    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"noADS"];
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    
+                    @try
+                    {
+                        [store setString:@"YES" forKey:@"nameSearch"];
+                    } @catch (NSException *exception) {
+                        [store setString:@"YES" forKey:@"nameSearch"];
+                    }
+                    [store synchronize];
                 }
 
                 [[NSUserDefaults standardUserDefaults]synchronize];
@@ -177,10 +192,28 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     
    if([ss rangeOfString:@"11"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"phonePartSearch"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        }
+        [store synchronize];
+
     }else if([ss rangeOfString:@"22"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"nameSearch"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        }
+        [store synchronize];
+
     }else if([ss rangeOfString:@"33"].location != NSNotFound)
     {
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"noADS"];
@@ -194,13 +227,31 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     NSString* ss = (NSString*)[NSString stringWithFormat:@"%@",productIdentifier];
     if([ss rangeOfString:@"11"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"phonePartSearch"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        }
+        [store synchronize];
+
         [_purchasedProductIdentifiers addObject:productIdentifier];
         [[NSUserDefaults standardUserDefaults]synchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];
     }else if([ss rangeOfString:@"22"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"nameSearch"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        }
+        [store synchronize];
+
         [_purchasedProductIdentifiers addObject:productIdentifier];
         [[NSUserDefaults standardUserDefaults]synchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];

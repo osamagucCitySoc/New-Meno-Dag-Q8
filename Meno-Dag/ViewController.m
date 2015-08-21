@@ -102,11 +102,11 @@
     
     [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
     [Chartboost cacheMoreApps:CBLocationHomeScreen];
-    [Chartboost showInterstitial:CBLocationItemStore];
+    // [Chartboost showInterstitial:CBLocationItemStore];
     
     
     self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
-    BOOL canPresent= [self requestInterstitialAdPresentation];
+    [self requestInterstitialAdPresentation];
 
 }
 

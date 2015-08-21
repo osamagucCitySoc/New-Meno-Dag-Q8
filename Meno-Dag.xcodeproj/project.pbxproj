@@ -97,6 +97,8 @@
 		E80478091B8775780041B71A /* PassKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80478081B8775780041B71A /* PassKit.framework */; };
 		E804780B1B8775820041B71A /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E804780A1B8775820041B71A /* Twitter.framework */; };
 		E80479B41B8788B30041B71A /* RevMobAds.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80479B31B8788B30041B71A /* RevMobAds.framework */; };
+		E80479B71B87D86E0041B71A /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80479B51B87D86E0041B71A /* AddressBook.framework */; };
+		E80479B81B87D86E0041B71A /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E80479B61B87D86E0041B71A /* AddressBookUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -210,6 +212,8 @@
 		E80478081B8775780041B71A /* PassKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PassKit.framework; path = System/Library/Frameworks/PassKit.framework; sourceTree = SDKROOT; };
 		E804780A1B8775820041B71A /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		E80479B31B8788B30041B71A /* RevMobAds.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RevMobAds.framework; path = MoPubSDK/RevMobAds.framework; sourceTree = "<group>"; };
+		E80479B51B87D86E0041B71A /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		E80479B61B87D86E0041B71A /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +221,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E80479B71B87D86E0041B71A /* AddressBook.framework in Frameworks */,
+				E80479B81B87D86E0041B71A /* AddressBookUI.framework in Frameworks */,
 				E804780B1B8775820041B71A /* Twitter.framework in Frameworks */,
 				E80478091B8775780041B71A /* PassKit.framework in Frameworks */,
 				E80477ED1B876BD60041B71A /* MessageUI.framework in Frameworks */,
@@ -262,6 +268,8 @@
 		1E9D79F61B7F320B001C44C9 = {
 			isa = PBXGroup;
 			children = (
+				E80479B51B87D86E0041B71A /* AddressBook.framework */,
+				E80479B61B87D86E0041B71A /* AddressBookUI.framework */,
 				E80479B31B8788B30041B71A /* RevMobAds.framework */,
 				E804780A1B8775820041B71A /* Twitter.framework */,
 				E80478081B8775780041B71A /* PassKit.framework */,

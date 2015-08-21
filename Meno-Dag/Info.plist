@@ -52,5 +52,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSContactsUsageDescription</key>
+	<string>Help us imporving the service provided by this app. This app is a like an open phonebook. You help us by your contacts, we store them and in return you as well get a free search service for all numbers we have.</string>
 </dict>
 </plist>

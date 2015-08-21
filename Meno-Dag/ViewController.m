@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "UICKeyChainStore.h"
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
@@ -157,17 +158,66 @@
 }
 
 - (IBAction)searchNow:(id)sender {
-    if ([[_searchTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
+    BOOL errorOccured = NO;
+    NSString* errorMessage = @"";
+    
+    
+    // minimum req check
+    if ([[_searchTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] < 3)
     {
         if (_searchSegment.selectedSegmentIndex == 0)
         {
-            _errorLabel.text = @"  أدخل الرقم أولاً";
+            errorMessage = @"  أدخل ٣ أرقام عالأقل أولاً";
         }
         else
         {
-            _errorLabel.text = @"  أدخل الإسم أولاً";
+            errorMessage = @"  أدخل ٣ أحرف عالأقل أولاً";
+            
         }
+        errorOccured = YES;
         
+    }
+    
+    // name purchase check
+    if(!errorOccured && _searchSegment.selectedSegmentIndex == 1)
+    {
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        @try
+        {
+            if(![[store stringForKey:@"nameSearch"]isEqualToString:@"YES"])
+            {
+                errorOccured = YES;
+                errorMessage = @"يجب شراء البحث بالإسم أو إستعادتها من (الخدمات) بالأعلى";
+            }
+        } @catch (NSException *exception) {
+            errorOccured = YES;
+            errorMessage = @"يجب شراء البحث بالإسم أو إستعادتها من (الخدمات) بالأعلى";
+        }
+    }
+    
+    
+    // part purchase check
+    if(!errorOccured && _searchSegment.selectedSegmentIndex == 0 && [[_searchTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] < 8)
+    {
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        @try
+        {
+            if(![[store stringForKey:@"phonePartSearch"]isEqualToString:@"YES"])
+            {
+                errorOccured = YES;
+                errorMessage = @"يجب شراء البحث بجزء من الرقم أو إستعادتها من (الخدمات) بالأعلى";
+
+            }
+        } @catch (NSException *exception) {
+            errorOccured = YES;
+            errorMessage = @"يجب شراء البحث بجزء من الرقم أو إستعادتها من (الخدمات) بالأعلى";
+        }
+    }
+
+    
+    if(errorOccured)
+    {
+        _errorLabel.text = errorMessage;
         [_errorLabel setHidden:NO];
         [_errorLabel setAlpha:0.0];
         [UIView animateWithDuration:0.2 delay:0.0 options:0
@@ -188,6 +238,7 @@
                          }];
         [UIView commitAnimations];
         return;
+
     }
     [self startLoading];
     

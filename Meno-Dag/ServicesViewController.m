@@ -51,6 +51,8 @@
     phonePartSearch1 = @"phonePartSearch";
     nameSearch1 = @"nameSearch";
     
+    [loader setAlpha:1.0];
+    
     [self reload];
 }
 
@@ -79,6 +81,7 @@
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         _blockPriceText.text = [NSString stringWithFormat:@"%.02f",product.price.floatValue];
+                        loader.alpha = 0;
                     });
                 }else if([ss rangeOfString:@"11"].location != NSNotFound)
                 {

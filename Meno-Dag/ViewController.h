@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
+#import "MPAdView.h"
+#import "MPInterstitialAdController.h"
 
 @interface ViewController : UIViewController <UIActionSheetDelegate>
 {
@@ -19,6 +21,8 @@
     NSInteger currentInt;
 }
 
+@property (nonatomic, retain) MPAdView *adView;
+@property (nonatomic, retain) MPInterstitialAdController *interstitial;
 @property (strong, nonatomic) IBOutlet UITextField *searchTextField;
 @property (strong, nonatomic) IBOutlet UIImageView *largePhoneIcon;
 @property (strong, nonatomic) IBOutlet UILabel *selectBack;

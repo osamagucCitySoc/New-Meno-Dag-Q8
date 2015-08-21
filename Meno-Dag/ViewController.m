@@ -13,11 +13,12 @@
 #import <AdSupport/AdSupport.h>
 #import <iAd/iAd.h>
 #import <MMAdSDK/MMAdSDK.h>
+#import "MPAdView.h"
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate,MMInterstitialDelegate>
+@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate,MMInterstitialDelegate,MPAdViewDelegate,MPInterstitialAdControllerDelegate>
 {
     NSString *currentName,*currentNumber;
 }
@@ -34,6 +35,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    
+     [self loadInterstitial];
     
     requestingAd = NO;
     
@@ -107,6 +110,21 @@
     
     self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
     [self requestInterstitialAdPresentation];
+    
+    adBanner.delegate = self;
+    adBanner.alpha = 0.0;
+
+    self.adView = [[MPAdView alloc] initWithAdUnitId:@"58d9953fc7ce4969a89a139d3675687d"
+                                                 size:MOPUB_BANNER_SIZE];
+    self.adView.delegate = self;
+    CGRect frame = self.adView.frame;
+    CGSize size = [self.adView adContentViewSize];
+    frame.origin.y = [[UIScreen mainScreen] applicationFrame].size.height - size.height;
+    self.adView.frame = frame;
+    [self.view addSubview:self.adView];
+    [self.adView loadAd];
+    
+    [super viewDidLoad];
 
 }
 
@@ -119,9 +137,7 @@
         [self openSearch:nil];
     }
     
-    adBanner.delegate = self;
-    adBanner.alpha = 0.0;
-}
+    }
 
 -(void)startAll
 {
@@ -1342,6 +1358,29 @@ applicationActivities:nil];
 }
 
 
+#pragma mark - <MPAdViewDelegate>
+- (UIViewController *)viewControllerForPresentingModalView {
+    return self;
+}
+
+
+
+- (void)loadInterstitial {
+    // Instantiate the interstitial using the class convenience method.
+    self.interstitial = [MPInterstitialAdController
+                         interstitialAdControllerForAdUnitId:@"34f437f0029945c988809fc8d4b88cda"];
+    
+    // Fetch the interstitial ad.
+    [self.interstitial loadAd];
+}
+
+// Present the ad only after it is ready.
+- (void)levelDidEnd {
+    if (self.interstitial.ready) [self.interstitial showFromViewController:self];
+    else {
+        // The interstitial wasn't ready, so continue as usual.
+    }
+}
 
 
 @end

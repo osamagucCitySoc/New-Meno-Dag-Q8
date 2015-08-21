@@ -8,11 +8,15 @@
 
 #import "ViewController.h"
 #import "UICKeyChainStore.h"
+#import <Chartboost/Chartboost.h>
+#import <CommonCrypto/CommonDigest.h>
+#import <AdSupport/AdSupport.h>
+
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()
+@interface ViewController ()<ChartboostDelegate>
 {
     NSString *currentName,*currentNumber;
 }
@@ -79,6 +83,11 @@
     
     [self performSelector:@selector(startAll) withObject:nil afterDelay:0.5];
     
+    
+    
+    [Chartboost startWithAppId:@"53ca57cc89b0bb41583af870" appSignature:@"703f9dc7647925bbc3553213bbaa92183ef97e1c" delegate:self];
+    
+    
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -90,6 +99,10 @@
         isServices = NO;
         [self openSearch:nil];
     }
+    
+    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
+    [Chartboost cacheMoreApps:CBLocationHomeScreen];
+    [Chartboost showInterstitial:CBLocationItemStore];
 }
 
 -(void)startAll
@@ -117,7 +130,7 @@
                                               }
                                           }
                                           completion:^(BOOL finished) {
-                                              [self changeSearchKeyboard];
+                                              //[self changeSearchKeyboard];
                                           }];
                          [UIView commitAnimations];
                      }];
@@ -1209,5 +1222,52 @@ applicationActivities:nil];
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
+#pragma mark chartboost delegate
+- (BOOL)shouldDisplayInterstitial:(NSString *)location {
+    NSLog(@"about to display interstitial at location %@", location);
+    
+    // For example:
+    // if the user has left the main menu and is currently playing your game, return NO;
+    
+    // Otherwise return YES to display the interstitial
+    return YES;
+}
+- (void)didFailToLoadInterstitial:(NSString *)location withError:(CBLoadError)error {
+    switch(error){
+        case CBLoadErrorInternetUnavailable: {
+            NSLog(@"Failed to load Interstitial, no Internet connection !");
+        } break;
+        case CBLoadErrorInternal: {
+            NSLog(@"Failed to load Interstitial, internal error !");
+        } break;
+        case CBLoadErrorNetworkFailure: {
+            NSLog(@"Failed to load Interstitial, network error !");
+        } break;
+        case CBLoadErrorWrongOrientation: {
+            NSLog(@"Failed to load Interstitial, wrong orientation !");
+        } break;
+        case CBLoadErrorTooManyConnections: {
+            NSLog(@"Failed to load Interstitial, too many connections !");
+        } break;
+        case CBLoadErrorFirstSessionInterstitialsDisabled: {
+            NSLog(@"Failed to load Interstitial, first session !");
+        } break;
+        case CBLoadErrorNoAdFound : {
+            NSLog(@"Failed to load Interstitial, no ad found !");
+        } break;
+        case CBLoadErrorSessionNotStarted : {
+            NSLog(@"Failed to load Interstitial, session not started !");
+        } break;
+        case CBLoadErrorNoLocationFound : {
+            NSLog(@"Failed to load Interstitial, missing location parameter !");
+        } break;
+        default: {
+            NSLog(@"Failed to load Interstitial, unknown error !");
+        }
+    }
+}
+
 
 @end

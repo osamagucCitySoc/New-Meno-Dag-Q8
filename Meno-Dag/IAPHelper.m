@@ -65,7 +65,17 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
                         [store setString:@"YES" forKey:@"nameSearch"];
                     }
                     [store synchronize];
-                }
+                }else if([ss rangeOfString:@"55"].location != NSNotFound)
+                {
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    
+                    @try
+                    {
+                        [store setString:@"YES" forKey:@"ads"];
+                    } @catch (NSException *exception) {
+                        [store setString:@"YES" forKey:@"ads"];
+                    }
+                    [store synchronize];                }
 
                 [[NSUserDefaults standardUserDefaults]synchronize];
             } else {
@@ -214,9 +224,17 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
         }
         [store synchronize];
 
-    }else if([ss rangeOfString:@"33"].location != NSNotFound)
+    }else if([ss rangeOfString:@"55"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"noADS"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"ads"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"ads"];
+        }
+        [store synchronize];
     }
 
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -255,9 +273,17 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
         [_purchasedProductIdentifiers addObject:productIdentifier];
         [[NSUserDefaults standardUserDefaults]synchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];
-    }else if([ss rangeOfString:@"33"].location != NSNotFound)
+    }else if([ss rangeOfString:@"55"].location != NSNotFound)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"noADS"];
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"ads"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"ads"];
+        }
+        [store synchronize];
         [_purchasedProductIdentifiers addObject:productIdentifier];
         [[NSUserDefaults standardUserDefaults]synchronize];
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];

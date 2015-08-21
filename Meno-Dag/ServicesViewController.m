@@ -97,6 +97,36 @@
 }
 
 #pragma mark purchase method
+- (IBAction)restoreClicked:(id)sender {
+    followersExchangePurchase *inAppPurchaseHelper = [followersExchangePurchase sharedInstance];
+    [inAppPurchaseHelper restoreCompletedTransactions];
+    
+    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDag.11"]){
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"phonePartSearch"];
+        }
+        [store synchronize];
+
+    }
+    
+    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDag.22"]){
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"nameSearch"];
+        }
+        [store synchronize];
+    }
+
+}
 
 - (IBAction)blockClicked:(id)sender {
     UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"بلوك لرقمك" message:@"من فضلك أدخل الرقم" delegate:self cancelButtonTitle:@"إلغاء" otherButtonTitles:@"بلوك", nil];

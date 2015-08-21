@@ -684,7 +684,11 @@
                                 <action selector="closeMe:" destination="RRX-R9-sUA" id="S2I-vb-rSI"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="إسترجاع المشتريات" id="b4H-x7-ERY"/>
+                        <barButtonItem key="rightBarButtonItem" title="إسترجاع المشتريات" id="b4H-x7-ERY">
+                            <connections>
+                                <action selector="restoreClicked:" destination="RRX-R9-sUA" id="ACY-gC-IfI"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
                     <connections>

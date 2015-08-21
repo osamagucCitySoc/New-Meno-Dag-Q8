@@ -11,18 +11,22 @@
 #import <Chartboost/Chartboost.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <AdSupport/AdSupport.h>
-
+#import <iAd/iAd.h>
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ChartboostDelegate>
+@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate>
 {
     NSString *currentName,*currentNumber;
 }
 @end
 
 @implementation ViewController
+{
+    
+    __weak IBOutlet ADBannerView *adBanner;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -103,6 +107,10 @@
     [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
     [Chartboost cacheMoreApps:CBLocationHomeScreen];
     [Chartboost showInterstitial:CBLocationItemStore];
+    
+    
+    adBanner.delegate = self;
+    adBanner.alpha = 0.0;
 }
 
 -(void)startAll
@@ -1268,6 +1276,32 @@ applicationActivities:nil];
         }
     }
 }
+
+
+#pragma mark Banner Ad delegate
+
+-(BOOL)bannerViewActionShouldBegin:(ADBannerView *)banner willLeaveApplication:(BOOL)willLeave{
+    NSLog(@"Ad Banner action is about to begin.");
+    
+    return YES;
+}
+
+-(void)bannerViewDidLoadAd:(ADBannerView *)banner{
+    NSLog(@"Ad Banner did load ad.");
+    
+    // Show the ad banner.
+    [UIView animateWithDuration:0.5 animations:^{
+        adBanner.alpha = 1.0;
+    }];
+}
+
+-(void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error{
+    NSLog(@"Unable to show ads. Error: %@", [error localizedDescription]);
+    [UIView animateWithDuration:0.5 animations:^{
+        adBanner.alpha = 0.0;
+    }];
+}
+
 
 
 @end

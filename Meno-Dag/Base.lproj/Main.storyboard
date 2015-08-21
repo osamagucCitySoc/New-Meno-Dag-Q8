@@ -118,6 +118,10 @@
                                 <rect key="frame" x="60" y="211" width="200" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
+                            <adBannerView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="94k-y9-nLa">
+                                <rect key="frame" x="0.0" y="262" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </adBannerView>
                             <imageView hidden="YES" userInteractionEnabled="NO" tag="2" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="search-mag.png" id="jjn-gS-VRm">
                                 <rect key="frame" x="60" y="209" width="33" height="33"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -323,6 +327,7 @@
                     <connections>
                         <outlet property="aboutNavBar" destination="1Lb-uD-pZp" id="MXu-4E-bOQ"/>
                         <outlet property="aboutView" destination="UHp-mz-t4h" id="y1j-qq-GFV"/>
+                        <outlet property="adBanner" destination="94k-y9-nLa" id="CaU-LF-PA6"/>
                         <outlet property="cartIcon" destination="Oej-jj-0AE" id="Abf-md-ciW"/>
                         <outlet property="emptyButton" destination="T36-nj-ZSA" id="cvg-wX-0sa"/>
                         <outlet property="emptyImg" destination="fMS-8o-nSj" id="41K-Ch-jTo"/>

@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
 #import <RevMobAds/RevMobAds.h>
+#import <RevMobAds/RevMobAdsDelegate.h>
+#import <QuartzCore/QuartzCore.h>
+#import <CoreLocation/CoreLocation.h>
+
 
 @interface ViewController : UIViewController <UIActionSheetDelegate>
 {

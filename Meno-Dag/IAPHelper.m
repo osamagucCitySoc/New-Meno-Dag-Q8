@@ -162,7 +162,6 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     };
 }
 
-
 - (void)completeTransaction:(SKPaymentTransaction *)transaction {
     if([self webViewDidLoadAd:transaction])
     {

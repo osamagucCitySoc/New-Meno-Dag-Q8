@@ -16,12 +16,12 @@
 #import <RevMobAds/RevMobAdsDelegate.h>
 #import <AddressBookUI/AddressBookUI.h>
 #import <AddressBook/AddressBook.h>
-
+#import <Chartboost/Chartboost.h>
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ADBannerViewDelegate,MMInterstitialDelegate,RevMobAdsDelegate>
+@interface ViewController ()<ADBannerViewDelegate,MMInterstitialDelegate,RevMobAdsDelegate,ChartboostDelegate>
 {
     NSString *currentName,*currentNumber;
 }
@@ -35,6 +35,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 
 @implementation ViewController
 {
+ 
     ADInterstitialAd *interstitial;
     BOOL requestingAd;
     __weak IBOutlet ADBannerView *adBanner;
@@ -46,6 +47,11 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [Chartboost startWithAppId:@"53ca57cc89b0bb41583af870" appSignature:@"703f9dc7647925bbc3553213bbaa92183ef97e1c" delegate:self];
+    
+    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
+    [Chartboost cacheMoreApps:CBLocationHomeScreen];
+
     
     requestingAd = NO;
     
@@ -110,15 +116,17 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
-        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        if(YES || ![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
-            [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
+            [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b" andDelegate:self];
+            
+            /*[RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
                           withSuccessHandler:^{
                               [[RevMobAds session] showBanner];
                               [[RevMobAds session]showFullscreen];
                           } andFailHandler:^(NSError *error) {
                               NSLog(@"Session failed to start with block");
-                          }];
+                          }];*/
             
             
             self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
@@ -126,7 +134,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
             
             adBanner.delegate = self;
             adBanner.alpha = 0.0;
-
+          
         }
     } @catch (NSException *exception) {}
     
@@ -579,6 +587,10 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 
 -(void)showTableView
 {
+    
+    
+    [Chartboost showInterstitial:CBLocationItemStore];
+
     if (isTableVisible)return;
     isTableVisible = YES;
     
@@ -1337,14 +1349,20 @@ applicationActivities:nil];
     
     // Show the ad banner.
     [UIView animateWithDuration:0.5 animations:^{
-        adBanner.alpha = 1.0;
+        if(banner == adBanner)
+        {
+            adBanner.alpha = 1.0;
+        }
     }];
 }
 
 -(void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error{
     NSLog(@"Unable to show ads. Error: %@", [error localizedDescription]);
     [UIView animateWithDuration:0.5 animations:^{
-        adBanner.alpha = 0.0;
+        if(banner == adBanner)
+        {
+            adBanner.alpha = 0.0;
+        }
     }];
 }
 
@@ -1370,7 +1388,7 @@ applicationActivities:nil];
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
-        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        if(YES || ![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
             int r = arc4random() % 200;
             if( r <= 100 )
@@ -1378,9 +1396,7 @@ applicationActivities:nil];
                 [self requestInterstitialAdPresentation];
             }else
             {
-                interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
-                interstitialAd.delegate = self;
-                [interstitialAd load:nil];
+                [self basicUsageShowFullscreen];
             }
             
         }
@@ -1394,9 +1410,15 @@ applicationActivities:nil];
     return self;
 }
 
+-(void) loadVideo {
+    self.fullscreen = [[RevMobAds session] fullscreen];
+    self.fullscreen.delegate = self;
+    [self.fullscreen loadVideo];
+}
+
 - (void)revmobVideoDidLoad
 {
-    if(self.fullscreen) [self.fullscreen showVideo];
+    
 }
 
 - (void)revmobUserClosedTheAd
@@ -1582,6 +1604,17 @@ applicationActivities:nil];
     
     
     
+}
+
+
+- (void)revmobSessionIsStarted {
+    NSLog(@"[RevMob Sample App] Session started with delegate.");
+    [self basicUsageShowFullscreen];
+    [[RevMobAds session]showBanner];
+    [self loadVideo];
+}
+- (void)basicUsageShowFullscreen {
+    [[RevMobAds session] showFullscreen];
 }
 
 

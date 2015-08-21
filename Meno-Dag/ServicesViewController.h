@@ -13,6 +13,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *blockPriceText;
 @property (strong, nonatomic) IBOutlet UILabel *namePriceText;
 @property (strong, nonatomic) IBOutlet UILabel *partPriceText;
+@property (weak, nonatomic) IBOutlet UILabel *adRemovePriceText;
 
 
 @end

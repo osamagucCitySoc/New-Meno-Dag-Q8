@@ -8,8 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
-#import "MPAdView.h"
-#import "MPInterstitialAdController.h"
+#import <RevMobAds/RevMobAds.h>
 
 @interface ViewController : UIViewController <UIActionSheetDelegate>
 {
@@ -21,8 +20,8 @@
     NSInteger currentInt;
 }
 
-@property (nonatomic, retain) MPAdView *adView;
-@property (nonatomic, retain) MPInterstitialAdController *interstitial;
+
+@property (nonatomic, retain) RevMobFullscreen *video;
 @property (strong, nonatomic) IBOutlet UITextField *searchTextField;
 @property (strong, nonatomic) IBOutlet UIImageView *largePhoneIcon;
 @property (strong, nonatomic) IBOutlet UILabel *selectBack;

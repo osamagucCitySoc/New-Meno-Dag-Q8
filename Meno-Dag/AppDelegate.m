@@ -12,6 +12,7 @@
 #import <MMAdSDK/MMAdSDK.h>
 #import <Parse/Parse.h>
 
+
 @interface AppDelegate ()
 
 @end
@@ -54,7 +55,6 @@
     
     [Parse setApplicationId:@"xLBJK0r2XiAuySjN278MJwqe3Lvd8cZ8Z09ycjdT"
                   clientKey:@"C4qCCDpKXZYFZXoHPenLNu98FOV9Al2A2QSuhU7k"];
-
     
     return YES;
 }

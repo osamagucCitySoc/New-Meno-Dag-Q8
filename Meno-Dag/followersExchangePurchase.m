@@ -19,6 +19,7 @@
                                       @"arabdevs.menoDag.11",
                                       @"arabdevs.menoDag.22",
                                       @"arabdevs.menoDag.44",
+                                      @"arabdevs.menoDag.55",
                                       nil];
         sharedInstance = [[self alloc] initWithProductIdentifiers:productIdentifiers];
     });

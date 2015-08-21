@@ -46,7 +46,7 @@
 {
     [super viewDidLoad];
     
-    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width, 680);
+    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width, 956);
     
     phonePartSearch1 = @"phonePartSearch";
     nameSearch1 = @"nameSearch";
@@ -92,6 +92,11 @@
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         _namePriceText.text = [NSString stringWithFormat:@"%.02f",product.price.floatValue];
+                    });
+                }else if([ss rangeOfString:@"55"].location != NSNotFound)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        _adRemovePriceText.text = [NSString stringWithFormat:@"%.02f",product.price.floatValue];
                     });
                 }
             }
@@ -154,6 +159,22 @@
     [[followersExchangePurchase sharedInstance] buyProduct:product];
 
 }
+
+- (IBAction)removeAdsClicked:(id)sender {
+    if (products.count == 0)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"فشل في الإتصال" message:@"رجاء تأكد من إتصال الإنترنت لديك وحاول مرة أخرى." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"تم", nil];
+        [alert show];
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [loader setAlpha:1.0];
+    });
+    buyInt = 3;
+    SKProduct *product = products[buyInt];
+    [[followersExchangePurchase sharedInstance] buyProduct:product];
+}
+
 - (IBAction)partClicked:(id)sender {
     if (products.count == 0)
     {
@@ -293,6 +314,21 @@
                         });
 
                     });
+                }if([ss rangeOfString:@"55"].location != NSNotFound)
+                {
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    
+                    @try
+                    {
+                        [store setString:@"YES" forKey:@"ads"];
+                    } @catch (NSException *exception) {
+                        [store setString:@"YES" forKey:@"ads"];
+                    }
+                    [store synchronize];
+                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                        [loader setAlpha:0.0];
+                        [alert show];
+                    });
                 }
                 *stop = YES;
             }
@@ -340,6 +376,19 @@
                 [store synchronize];
 
                 UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"تم" message:@"تم إسترجاع البحث بالإسم" delegate:nil cancelButtonTitle:@"تم" otherButtonTitles:nil];
+                [alert show];
+            }else if([ss rangeOfString:@"55"].location != NSNotFound)
+            {
+                UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                
+                @try
+                {
+                    [store setString:@"YES" forKey:@"ads"];
+                } @catch (NSException *exception) {
+                    [store setString:@"YES" forKey:@"ads"];
+                }
+                [store synchronize];
+                UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"تم" message:@"تم إسترجاع إزالة الإعلانات" delegate:nil cancelButtonTitle:@"تم" otherButtonTitles:nil];
                 [alert show];
             }
         }

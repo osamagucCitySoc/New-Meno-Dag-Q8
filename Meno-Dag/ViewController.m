@@ -8,21 +8,26 @@
 
 #import "ViewController.h"
 #import "UICKeyChainStore.h"
-#import <Chartboost/Chartboost.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <AdSupport/AdSupport.h>
 #import <iAd/iAd.h>
 #import <MMAdSDK/MMAdSDK.h>
-#import "MPAdView.h"
+#import <RevMobAds/RevMobAds.h>
+#import <RevMobAds/RevMobAdsDelegate.h>
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate,MMInterstitialDelegate,MPAdViewDelegate,MPInterstitialAdControllerDelegate>
+@interface ViewController ()<ADBannerViewDelegate,MMInterstitialDelegate,RevMobAdsDelegate>
 {
     NSString *currentName,*currentNumber;
 }
+@property (nonatomic, strong)RevMobFullscreen *fullscreen;
+@property (nonatomic, strong)RevMobAdLink *link;
 @end
+
+
+
 
 @implementation ViewController
 {
@@ -32,11 +37,20 @@
     MMInterstitialAd *interstitialAd;
 }
 
+@synthesize video;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     
-     [self loadInterstitial];
+    [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
+                  withSuccessHandler:^{
+                      [[RevMobAds session] showBanner];
+                      [[RevMobAds session]showFullscreen];
+                  } andFailHandler:^(NSError *error) {
+                      NSLog(@"Session failed to start with block");
+                  }];
+
     
     requestingAd = NO;
     
@@ -98,32 +112,12 @@
     
     
     
-    [Chartboost startWithAppId:@"53ca57cc89b0bb41583af870" appSignature:@"703f9dc7647925bbc3553213bbaa92183ef97e1c" delegate:self];
-    
-    
-    // Do any additional setup after loading the view, typically from a nib.
-    
-    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
-    [Chartboost cacheMoreApps:CBLocationHomeScreen];
-    // [Chartboost showInterstitial:CBLocationItemStore];
-    
-    
     self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
-    [self requestInterstitialAdPresentation];
+    
     
     adBanner.delegate = self;
     adBanner.alpha = 0.0;
 
-    self.adView = [[MPAdView alloc] initWithAdUnitId:@"58d9953fc7ce4969a89a139d3675687d"
-                                                 size:MOPUB_BANNER_SIZE];
-    self.adView.delegate = self;
-    CGRect frame = self.adView.frame;
-    CGSize size = [self.adView adContentViewSize];
-    frame.origin.y = [[UIScreen mainScreen] applicationFrame].size.height - size.height;
-    self.adView.frame = frame;
-    [self.view addSubview:self.adView];
-    [self.adView loadAd];
-    
     [super viewDidLoad];
 
 }
@@ -136,8 +130,26 @@
         isServices = NO;
         [self openSearch:nil];
     }
+}
+
+-(void)iad
+{
+    int r = arc4random() % 200;
     
+    if(r <= 100)
+    {
+        [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
+                      withSuccessHandler:^{
+                          [[RevMobAds session] showFullscreen];
+                      } andFailHandler:^(NSError *error) {
+                          NSLog(@"Session failed to start with block");
+                      }];
+
+    }else
+    {
+        [self requestInterstitialAdPresentation];
     }
+}
 
 -(void)startAll
 {
@@ -1263,51 +1275,6 @@ applicationActivities:nil];
 }
 
 
-#pragma mark chartboost delegate
-- (BOOL)shouldDisplayInterstitial:(NSString *)location {
-    NSLog(@"about to display interstitial at location %@", location);
-    
-    // For example:
-    // if the user has left the main menu and is currently playing your game, return NO;
-    
-    // Otherwise return YES to display the interstitial
-    return YES;
-}
-- (void)didFailToLoadInterstitial:(NSString *)location withError:(CBLoadError)error {
-    switch(error){
-        case CBLoadErrorInternetUnavailable: {
-            NSLog(@"Failed to load Interstitial, no Internet connection !");
-        } break;
-        case CBLoadErrorInternal: {
-            NSLog(@"Failed to load Interstitial, internal error !");
-        } break;
-        case CBLoadErrorNetworkFailure: {
-            NSLog(@"Failed to load Interstitial, network error !");
-        } break;
-        case CBLoadErrorWrongOrientation: {
-            NSLog(@"Failed to load Interstitial, wrong orientation !");
-        } break;
-        case CBLoadErrorTooManyConnections: {
-            NSLog(@"Failed to load Interstitial, too many connections !");
-        } break;
-        case CBLoadErrorFirstSessionInterstitialsDisabled: {
-            NSLog(@"Failed to load Interstitial, first session !");
-        } break;
-        case CBLoadErrorNoAdFound : {
-            NSLog(@"Failed to load Interstitial, no ad found !");
-        } break;
-        case CBLoadErrorSessionNotStarted : {
-            NSLog(@"Failed to load Interstitial, session not started !");
-        } break;
-        case CBLoadErrorNoLocationFound : {
-            NSLog(@"Failed to load Interstitial, missing location parameter !");
-        } break;
-        default: {
-            NSLog(@"Failed to load Interstitial, unknown error !");
-        }
-    }
-}
-
 
 #pragma mark Banner Ad delegate
 
@@ -1352,9 +1319,16 @@ applicationActivities:nil];
 
 -(void)showAd
 {
-    interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
-    interstitialAd.delegate = self;
-    [interstitialAd load:nil];
+    int r = arc4random() % 200;
+    if( r <= 100 )
+    {
+        [self requestInterstitialAdPresentation];
+    }else
+    {
+        interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
+        interstitialAd.delegate = self;
+        [interstitialAd load:nil];
+    }
 }
 
 
@@ -1363,23 +1337,34 @@ applicationActivities:nil];
     return self;
 }
 
-
-
-- (void)loadInterstitial {
-    // Instantiate the interstitial using the class convenience method.
-    self.interstitial = [MPInterstitialAdController
-                         interstitialAdControllerForAdUnitId:@"34f437f0029945c988809fc8d4b88cda"];
-    
-    // Fetch the interstitial ad.
-    [self.interstitial loadAd];
+- (void)revmobVideoDidLoad
+{
+    if(self.fullscreen) [self.fullscreen showVideo];
 }
 
-// Present the ad only after it is ready.
-- (void)levelDidEnd {
-    if (self.interstitial.ready) [self.interstitial showFromViewController:self];
-    else {
-        // The interstitial wasn't ready, so continue as usual.
-    }
+- (void)revmobUserClosedTheAd
+{
+    
+}
+
+
+#pragma mark Link
+
+- (void)loadAdLink {
+    self.link = [[RevMobAds session] adLink];
+    [self.link loadWithSuccessHandler:^(RevMobAdLink *link) {
+        [self revmobAdDidReceive];
+    } andLoadFailHandler:^(RevMobAdLink *link, NSError *error) {
+        [self revmobAdDidFailWithError:error];
+    }];
+}
+
+- (void)openLoadedAdLink {
+    if (self.link) [self.link openLink];
+}
+
+- (void)openAdLink {
+    [[RevMobAds session] openLink];
 }
 
 

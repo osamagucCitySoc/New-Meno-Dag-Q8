@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "followersExchangePurchase.h"
+#import <iAd/iAd.h>
+#import <MMAdSDK/MMAdSDK.h>
 
 @interface AppDelegate ()
 
@@ -18,8 +20,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    
+    [UIViewController prepareInterstitialAds];
     [followersExchangePurchase sharedInstance];
+    
+    [[MMSDK sharedInstance] initializeWithSettings:nil withUserSettings:nil];
     
     return YES;
 }

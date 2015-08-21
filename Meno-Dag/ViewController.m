@@ -12,11 +12,12 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <AdSupport/AdSupport.h>
 #import <iAd/iAd.h>
+#import <MMAdSDK/MMAdSDK.h>
 
 #define APP_URL @"OSAMA APP URL HERE.."
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate>
+@interface ViewController ()<ChartboostDelegate,ADBannerViewDelegate,MMInterstitialDelegate>
 {
     NSString *currentName,*currentNumber;
 }
@@ -24,12 +25,17 @@
 
 @implementation ViewController
 {
-    
+    ADInterstitialAd *interstitial;
+    BOOL requestingAd;
     __weak IBOutlet ADBannerView *adBanner;
+    MMInterstitialAd *interstitialAd;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    
+    requestingAd = NO;
     
     savedLogNames = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNames"]];
     savedLogNumbers = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNumbers"]];
@@ -93,6 +99,15 @@
     
     
     // Do any additional setup after loading the view, typically from a nib.
+    
+    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
+    [Chartboost cacheMoreApps:CBLocationHomeScreen];
+    [Chartboost showInterstitial:CBLocationItemStore];
+    
+    
+    self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
+    BOOL canPresent= [self requestInterstitialAdPresentation];
+
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -103,11 +118,6 @@
         isServices = NO;
         [self openSearch:nil];
     }
-    
-    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
-    [Chartboost cacheMoreApps:CBLocationHomeScreen];
-    [Chartboost showInterstitial:CBLocationItemStore];
-    
     
     adBanner.delegate = self;
     adBanner.alpha = 0.0;
@@ -373,42 +383,44 @@
         dispatch_async (dispatch_get_main_queue(), ^{
             [[[self.navigationController view] viewWithTag:77] removeFromSuperview];
         });
-        
-        [self.tableView reloadData];
-        
-        [self stopLoading];
-        
-        if ([source count] == 0)
-        {
-            _errorLabel.text = @"  لايوجد نتائج";
-            [_errorLabel setHidden:NO];
-            [_errorLabel setAlpha:0.0];
-            [UIView animateWithDuration:0.2 delay:0.0 options:0
-                             animations:^{
-                                 [_searchTextField setAlpha:0.0];
-                                 [_errorLabel setAlpha:1.0];
-                             }
-                             completion:^(BOOL finished) {
-                                 [UIView animateWithDuration:0.2 delay:1.0 options:0
-                                                  animations:^{
-                                                      [_searchTextField setAlpha:1.0];
-                                                      [_errorLabel setAlpha:0.0];
-                                                  }
-                                                  completion:^(BOOL finished) {
-                                                      [_errorLabel setHidden:YES];
-                                                  }];
-                                 [UIView commitAnimations];
-                             }];
-            [UIView commitAnimations];
-        }
-        else
-        {
-            [self showTableView];
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+    
+            [self.tableView reloadData];
             
-            NSDictionary*result = [source objectAtIndex:0];
+            [self stopLoading];
             
-            [self saveToLogWithName:[result objectForKey:@"name"] andNumber:[result objectForKey:@"phone"]];
-        }
+            if ([source count] == 0)
+            {
+                _errorLabel.text = @"  لايوجد نتائج";
+                [_errorLabel setHidden:NO];
+                [_errorLabel setAlpha:0.0];
+                [UIView animateWithDuration:0.2 delay:0.0 options:0
+                                 animations:^{
+                                     [_searchTextField setAlpha:0.0];
+                                     [_errorLabel setAlpha:1.0];
+                                 }
+                                 completion:^(BOOL finished) {
+                                     [UIView animateWithDuration:0.2 delay:1.0 options:0
+                                                      animations:^{
+                                                          [_searchTextField setAlpha:1.0];
+                                                          [_errorLabel setAlpha:0.0];
+                                                      }
+                                                      completion:^(BOOL finished) {
+                                                          [_errorLabel setHidden:YES];
+                                                      }];
+                                     [UIView commitAnimations];
+                                 }];
+                [UIView commitAnimations];
+            }
+            else
+            {
+                [self showTableView];
+                
+                NSDictionary*result = [source objectAtIndex:0];
+                
+                [self saveToLogWithName:[result objectForKey:@"name"] andNumber:[result objectForKey:@"phone"]];
+            }
+        });
     }
 }
 
@@ -583,6 +595,9 @@
                              isLog = NO;
                              fromLog = NO;
                              [self performSelector:@selector(searchAgain) withObject:nil afterDelay:0.5];
+                         }else
+                         {
+                             [self performSelector:@selector(showAd) withObject:nil afterDelay:2];
                          }
                      }];
     [UIView commitAnimations];
@@ -1301,6 +1316,31 @@ applicationActivities:nil];
         adBanner.alpha = 0.0;
     }];
 }
+
+#pragma MM delegate
+- (void)showInterstitialAd {
+    if (interstitialAd.ready) {
+        [interstitialAd showFromViewController:self];
+    }
+}
+-(void)interstitialAdLoadDidSucceed:(MMInterstitialAd*)ad
+{
+    [self showInterstitialAd];
+}
+
+-(void)interstitialAd:(MMInterstitialAd*)ad loadDidFailWithError:(NSError*)error
+{
+    NSLog(@"%@",[error debugDescription]);
+}
+
+
+-(void)showAd
+{
+    interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
+    interstitialAd.delegate = self;
+    [interstitialAd load:nil];
+}
+
 
 
 

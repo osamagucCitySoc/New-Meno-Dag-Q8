@@ -101,7 +101,7 @@
     
     [self performSelector:@selector(startAll) withObject:nil afterDelay:0.5];
     
-    
+    adBanner.alpha = 0.0;
     
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try

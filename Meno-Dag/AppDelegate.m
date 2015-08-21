@@ -66,7 +66,7 @@
         if([store stringForKey:@"adsEnd"])
         {
             NSDate* expires = [formatter dateFromString:[store stringForKey:@"adsEnd"]];
-            if([[NSDate date] timeIntervalSinceDate:expires] > 0)
+            if([[NSDate date] timeIntervalSinceDate:expires] < 0)
             {
                 [store setString:@"YES" forKey:@"ads"];
             }else

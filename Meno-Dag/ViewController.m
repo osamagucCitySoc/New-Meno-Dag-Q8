@@ -43,15 +43,6 @@
     [super viewDidLoad];
     
     
-    [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
-                  withSuccessHandler:^{
-                      [[RevMobAds session] showBanner];
-                      [[RevMobAds session]showFullscreen];
-                  } andFailHandler:^(NSError *error) {
-                      NSLog(@"Session failed to start with block");
-                  }];
-
-    
     requestingAd = NO;
     
     savedLogNames = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNames"]];
@@ -112,15 +103,35 @@
     
     
     
-    self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
-    
-    
-    adBanner.delegate = self;
-    adBanner.alpha = 0.0;
+    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    @try
+    {
+        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        {
+            [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
+                          withSuccessHandler:^{
+                              [[RevMobAds session] showBanner];
+                              [[RevMobAds session]showFullscreen];
+                          } andFailHandler:^(NSError *error) {
+                              NSLog(@"Session failed to start with block");
+                          }];
+            
+            
+            self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
+            
+            
+            adBanner.delegate = self;
+            adBanner.alpha = 0.0;
 
+        }
+    } @catch (NSException *exception) {}
+    
+    
     [super viewDidLoad];
 
 }
+
+
 
 -(void)viewDidAppear:(BOOL)animated
 {
@@ -1319,17 +1330,26 @@ applicationActivities:nil];
 
 -(void)showAd
 {
-    int r = arc4random() % 200;
-    if( r <= 100 )
+    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    @try
     {
-        [self requestInterstitialAdPresentation];
-    }else
-    {
-        interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
-        interstitialAd.delegate = self;
-        [interstitialAd load:nil];
-    }
-}
+        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        {
+            int r = arc4random() % 200;
+            if( r <= 100 )
+            {
+                [self requestInterstitialAdPresentation];
+            }else
+            {
+                interstitialAd = [[MMInterstitialAd alloc] initWithPlacementId:@"208272"];
+                interstitialAd.delegate = self;
+                [interstitialAd load:nil];
+            }
+            
+        }
+    } @catch (NSException *exception) {}
+
+   }
 
 
 #pragma mark - <MPAdViewDelegate>

@@ -23,6 +23,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     NSSet * _productIdentifiers;
     NSMutableSet * _purchasedProductIdentifiers;
     BOOL isRealBuy;
+    BOOL alreadyFound;
 }
 
 @synthesize validateConnection;
@@ -166,7 +167,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     if([self webViewDidLoadAd:transaction])
     {
         NSLog(@"completeTransaction...");
-        [self provideContentForProductIdentifier:transaction.payment.productIdentifier];
+        [self provideContentForProductIdentifier:transaction.payment.productIdentifier occured:transaction.transactionDate];
         [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
     }else
     {
@@ -179,7 +180,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
 - (void)restoreTransaction:(SKPaymentTransaction *)transaction {
     NSLog(@"restoreTransaction...%@",transaction.originalTransaction.payment.productIdentifier);
     
-    [self provideContentForProductIdentifierRestored:transaction.originalTransaction.payment.productIdentifier];
+    [self provideContentForProductIdentifierRestored:transaction.originalTransaction.payment.productIdentifier occured:transaction.originalTransaction.transactionDate];
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
@@ -197,7 +198,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
 }
 
 
-- (void)provideContentForProductIdentifier:(NSString *)productIdentifier {
+- (void)provideContentForProductIdentifier:(NSString *)productIdentifier occured:(NSDate*)occured {
     NSString* ss = (NSString*)[NSString stringWithFormat:@"%@",productIdentifier];
     
    if([ss rangeOfString:@"11"].location != NSNotFound)
@@ -227,12 +228,17 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     }else if([ss rangeOfString:@"55"].location != NSNotFound)
     {
         UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
-        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat: @"yyyy-MM-dd HH:mm:ss zzz"];
+        NSString* expirationDate = [formatter stringFromDate:[occured dateByAddingTimeInterval:(90*24*3600)]];
         @try
         {
+            
             [store setString:@"YES" forKey:@"ads"];
+            [store setString:expirationDate forKey:@"adsEnd"];
         } @catch (NSException *exception) {
             [store setString:@"YES" forKey:@"ads"];
+            [store setString:expirationDate forKey:@"adsEnd"];
         }
         [store synchronize];
     }
@@ -241,7 +247,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductPurchasedNotification object:productIdentifier userInfo:nil];
 }
 
-- (void)provideContentForProductIdentifierRestored:(NSString *)productIdentifier {
+- (void)provideContentForProductIdentifierRestored:(NSString *)productIdentifier occured:(NSDate*)occured{
     NSString* ss = (NSString*)[NSString stringWithFormat:@"%@",productIdentifier];
     if([ss rangeOfString:@"11"].location != NSNotFound)
     {
@@ -275,35 +281,74 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
         [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];
     }else if([ss rangeOfString:@"55"].location != NSNotFound)
     {
-        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
         
-        @try
+        long dayDiff = [self daysBetweenDate:occured andDate:[NSDate date]];
+        
+        if(alreadyFound || dayDiff <= 90)
         {
-            [store setString:@"YES" forKey:@"ads"];
-        } @catch (NSException *exception) {
-            [store setString:@"YES" forKey:@"ads"];
+            alreadyFound = YES;
+            UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat: @"yyyy-MM-dd HH:mm:ss zzz"];
+            NSString* expirationDate = [formatter stringFromDate:[occured dateByAddingTimeInterval:(90*24*3600)]];
+            @try
+            {
+                
+                [store setString:@"YES" forKey:@"ads"];
+                [store setString:expirationDate forKey:@"adsEnd"];
+            } @catch (NSException *exception) {
+                [store setString:@"YES" forKey:@"ads"];
+                [store setString:expirationDate forKey:@"adsEnd"];
+            }
+            [store synchronize];
+            [_purchasedProductIdentifiers addObject:productIdentifier];
+            [[NSUserDefaults standardUserDefaults]synchronize];
+            [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];
+        }else
+        {
+            alreadyFound = NO;
+            UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+            @try
+            {
+                [store setString:@"NO" forKey:@"ads"];
+            } @catch (NSException *exception) {
+                [store setString:@"NO" forKey:@"ads"];
+            }
+            [store synchronize];
         }
-        [store synchronize];
-        [_purchasedProductIdentifiers addObject:productIdentifier];
-        [[NSUserDefaults standardUserDefaults]synchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductRestoreNotification object:productIdentifier userInfo:nil];
     }
 }
 
+
+-(long)daysBetweenDate:(NSDate*)fromDateTime andDate:(NSDate*)toDateTime
+{
+    NSDate *fromDate;
+    NSDate *toDate;
+    
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    
+    [calendar rangeOfUnit:NSCalendarUnitDay startDate:&fromDate
+                 interval:NULL forDate:fromDateTime];
+    [calendar rangeOfUnit:NSCalendarUnitDay startDate:&toDate
+                 interval:NULL forDate:toDateTime];
+    
+    NSDateComponents *difference = [calendar components:NSCalendarUnitDay
+                                               fromDate:fromDate toDate:toDate options:0];
+    
+    return [difference day];
+}
 
 - (void)provideContentForProductIdentifierCanceled:(NSString *)productIdentifier {
     [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductFailedNotification object:productIdentifier userInfo:nil];
 }
 
 - (void)restoreCompletedTransactions {
+    alreadyFound = NO;
     [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
 -(BOOL)webViewDidLoadAd:(SKPaymentTransaction *)transaction
 {
-    //NSString* string = [[NSString alloc]initWithData:[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] encoding:NSUTF8StringEncoding];
-    //NSLog(@"%@",string);
-    
     NSString* string = [[NSString alloc]initWithData:transaction.transactionReceipt encoding:NSUTF8StringEncoding];
     
     NSString *post = [NSString stringWithFormat:@"purchase=%@",string];

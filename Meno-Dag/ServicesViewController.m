@@ -56,6 +56,12 @@
     [self reload];
 }
 
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (IBAction)closeMe:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -133,7 +139,18 @@
         }
         [store synchronize];
     }
-
+    
+    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDag.55"]){
+        UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+        
+        @try
+        {
+            [store setString:@"YES" forKey:@"ads"];
+        } @catch (NSException *exception) {
+            [store setString:@"YES" forKey:@"ads"];
+        }
+        [store synchronize];
+    }
 }
 
 - (IBAction)blockClicked:(id)sender {

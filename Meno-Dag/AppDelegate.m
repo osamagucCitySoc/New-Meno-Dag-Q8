@@ -11,7 +11,7 @@
 #import <iAd/iAd.h>
 #import <MMAdSDK/MMAdSDK.h>
 #import <Parse/Parse.h>
-
+#import "UICKeyChainStore.h"
 
 @interface AppDelegate ()
 
@@ -55,6 +55,34 @@
     
     [Parse setApplicationId:@"xLBJK0r2XiAuySjN278MJwqe3Lvd8cZ8Z09ycjdT"
                   clientKey:@"C4qCCDpKXZYFZXoHPenLNu98FOV9Al2A2QSuhU7k"];
+    
+    
+    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat: @"yyyy-MM-dd HH:mm:ss zzz"];
+    
+    @try
+    {
+        if([store stringForKey:@"adsEnd"])
+        {
+            NSDate* expires = [formatter dateFromString:[store stringForKey:@"adsEnd"]];
+            if([[NSDate date] timeIntervalSinceDate:expires] > 0)
+            {
+                [store setString:@"YES" forKey:@"ads"];
+            }else
+            {
+                [store setString:@"NO" forKey:@"ads"];
+            }
+        }else
+        {
+            [store setString:@"NO" forKey:@"ads"];
+        }
+    } @catch (NSException *exception) {
+        [store setString:@"NO" forKey:@"ads"];
+    }
+    [store synchronize];
+
+    
     
     return YES;
 }

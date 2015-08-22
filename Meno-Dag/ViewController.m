@@ -18,7 +18,7 @@
 #import <AddressBook/AddressBook.h>
 #import <Chartboost/Chartboost.h>
 
-#define APP_URL @"OSAMA APP URL HERE.."
+#define APP_URL @"https://goo.gl/16BAbd"
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
 @interface ViewController ()<ADBannerViewDelegate,MMInterstitialDelegate,RevMobAdsDelegate,ChartboostDelegate>
@@ -52,7 +52,6 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
     [Chartboost cacheMoreApps:CBLocationHomeScreen];
 
-    
     requestingAd = NO;
     
     savedLogNames = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNames"]];
@@ -110,6 +109,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     [_searchSegment setSelectedSegmentIndex:[[NSUserDefaults standardUserDefaults] integerForKey:@"selectedSegment"]];
     
     [self performSelector:@selector(startAll) withObject:nil afterDelay:0.5];
+    [self performSelector:@selector(checkRate) withObject:nil afterDelay:3.0];
     
     adBanner.alpha = 0.0;
     
@@ -171,12 +171,8 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
         }
     }
     
-    
     [super viewDidLoad];
-
 }
-
-
 
 -(void)viewDidAppear:(BOOL)animated
 {
@@ -185,6 +181,61 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     {
         isServices = NO;
         [self openSearch:nil];
+    }
+}
+
+-(void)checkAds
+{
+    NSURL *storeURL = [NSURL URLWithString:@"https://dl.dropboxusercontent.com/u/59230746/ArabDevs/menodag-ad.txt"];
+    
+    NSMutableURLRequest *storeRequest = [NSMutableURLRequest requestWithURL:storeURL cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:10];
+    
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    [NSURLConnection sendAsynchronousRequest:storeRequest queue:queue
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+                               if (!connectionError) {
+                                   NSError *error;
+                                   
+                                   NSString *firstdataStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                                   
+                                   NSData *theData = [firstdataStr dataUsingEncoding:NSUTF8StringEncoding];
+                                   
+                                   NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:theData options:0 error:&error];
+                                   
+                                   if (!jsonResponse || error)
+                                   {
+                                       NSLog(@"Error");
+                                   }
+                                   else
+                                   {
+                                       NSLog(@"%@",[jsonResponse objectForKey:@"adsVersion"]);
+                                       [[NSUserDefaults standardUserDefaults] setObject:jsonResponse forKey:@"adsJsonData"];
+                                       [[NSUserDefaults standardUserDefaults] synchronize];
+                                       
+                                       [self handleUpdate];
+                                   }
+                               }
+                           }];
+}
+
+-(void)handleUpdate
+{
+    NSDictionary *jsonResponse = [[NSUserDefaults standardUserDefaults] objectForKey:@"adsJsonData"];
+    
+    if ([[jsonResponse objectForKey:@"adsVersion"] integerValue] > [[NSUserDefaults standardUserDefaults] integerForKey:@"theUpdateVer"])
+    {
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^
+         {
+             [self performSegueWithIdentifier:@"adsSeg" sender:self];
+         }];
+        
+        [[NSUserDefaults standardUserDefaults] setInteger:[[jsonResponse objectForKey:@"adsVersion"] integerValue] forKey:@"theUpdateVer"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+    else
+    {
+        NSLog(@"%ld",(long)[[NSUserDefaults standardUserDefaults] integerForKey:@"theUpdateVer"]);
+        NSLog(@"%ld",(long)[[jsonResponse objectForKey:@"adsVersion"] integerValue]);
     }
 }
 
@@ -232,7 +283,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
                                               }
                                           }
                                           completion:^(BOOL finished) {
-                                              //[self changeSearchKeyboard];
+                                              [self changeSearchKeyboard];
                                           }];
                          [UIView commitAnimations];
                      }];
@@ -282,11 +333,11 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     {
         if (_searchSegment.selectedSegmentIndex == 0)
         {
-            errorMessage = @"  أدخل ٣ أرقام عالأقل أولاً";
+            errorMessage = @"  أدخل ٣ أرقام على الأقل أولاً";
         }
         else
         {
-            errorMessage = @"  أدخل ٣ أحرف عالأقل أولاً";
+            errorMessage = @"  أدخل ٣ أحرف على الأقل أولاً";
             
         }
         errorOccured = YES;
@@ -332,32 +383,39 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     
     if(errorOccured)
     {
-        _errorLabel.text = errorMessage;
-        [_errorLabel setHidden:NO];
-        [_errorLabel setAlpha:0.0];
-        [UIView animateWithDuration:0.2 delay:0.0 options:0
-                         animations:^{
-                             [_searchTextField setAlpha:0.0];
-                             [_errorLabel setAlpha:1.0];
-                         }
-                         completion:^(BOOL finished) {
-                             [UIView animateWithDuration:0.2 delay:1.0 options:0
-                                              animations:^{
-                                                  [_searchTextField setAlpha:1.0];
-                                                  [_errorLabel setAlpha:0.0];
-                                              }
-                                              completion:^(BOOL finished) {
-                                                  [_errorLabel setHidden:YES];
-                                              }];
-                             [UIView commitAnimations];
-                         }];
-        [UIView commitAnimations];
+        [self showErrorMsg:errorMessage];
         return;
 
     }
     [self startLoading];
     
     [self startSearch];
+}
+
+-(void)showErrorMsg:(NSString*)errorMessage
+{
+    [_errorLabel setTextAlignment:NSTextAlignmentCenter];
+    
+    _errorLabel.text = errorMessage;
+    [_errorLabel setHidden:NO];
+    [_errorLabel setAlpha:0.0];
+    [UIView animateWithDuration:0.2 delay:0.0 options:0
+                     animations:^{
+                         [_searchTextField setAlpha:0.0];
+                         [_errorLabel setAlpha:1.0];
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.2 delay:1.0 options:0
+                                          animations:^{
+                                              [_searchTextField setAlpha:1.0];
+                                              [_errorLabel setAlpha:0.0];
+                                          }
+                                          completion:^(BOOL finished) {
+                                              [_errorLabel setHidden:YES];
+                                          }];
+                         [UIView commitAnimations];
+                     }];
+    [UIView commitAnimations];
 }
 
 -(void)startSearch
@@ -475,26 +533,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
             
             if ([source count] == 0)
             {
-                _errorLabel.text = @"  لايوجد نتائج";
-                [_errorLabel setHidden:NO];
-                [_errorLabel setAlpha:0.0];
-                [UIView animateWithDuration:0.2 delay:0.0 options:0
-                                 animations:^{
-                                     [_searchTextField setAlpha:0.0];
-                                     [_errorLabel setAlpha:1.0];
-                                 }
-                                 completion:^(BOOL finished) {
-                                     [UIView animateWithDuration:0.2 delay:1.0 options:0
-                                                      animations:^{
-                                                          [_searchTextField setAlpha:1.0];
-                                                          [_errorLabel setAlpha:0.0];
-                                                      }
-                                                      completion:^(BOOL finished) {
-                                                          [_errorLabel setHidden:YES];
-                                                      }];
-                                     [UIView commitAnimations];
-                                 }];
-                [UIView commitAnimations];
+                [self showErrorMsg:@"لايوجد نتائج"];
             }
             else
             {
@@ -585,10 +624,163 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     [self hideTableView];
 }
 
+- (IBAction)rateNow:(id)sender {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=673931054&onlyLatestVersion=false&type=Purple+Software"]];
+    
+    [self hideRateView];
+}
+
+- (IBAction)closeRateView:(id)sender {
+    [self hideRateView];
+}
+
+-(void)checkRate
+{
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"doneRating"])
+    {
+        if ([[NSUserDefaults standardUserDefaults] integerForKey:@"rateCount"] >= 3)
+        {
+            [self showRateView];
+        }
+        else
+        {
+            [[NSUserDefaults standardUserDefaults] setInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"rateCount"]+1 forKey:@"rateCount"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            
+            [self checkAds];
+        }
+    }
+    else
+    {
+        [self checkAds];
+    }
+}
+
+-(void)showRateView
+{
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"doneRating"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    [_searchTextField resignFirstResponder];
+    [_rateView setAlpha:0.0];
+    [_rateView setFrame:self.view.frame];
+    [self.view addSubview:_rateView];
+    
+    for (UIView *view in _rateView.subviews)
+    {
+        if ([view tag] == 1)
+        {
+            [view setAlpha:0.0];
+            [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y-_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+        }
+        else
+        {
+            [view setAlpha:0.0];
+            [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y+_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+        }
+    }
+    
+    [UIView animateWithDuration:0.2 delay:0.0 options:0
+                     animations:^{
+                         [_rateView setAlpha:1.0];
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.2 delay:0.0 options:0
+                                          animations:^{
+                                              for (UIView *view in _rateView.subviews)
+                                              {
+                                                  if ([view tag] == 1)
+                                                  {
+                                                      [view setAlpha:1.0];
+                                                      [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y+_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                                                      break;
+                                                  }
+                                              }
+                                          }
+                                          completion:^(BOOL finished) {
+                                              [UIView animateWithDuration:0.2 delay:0.0 options:0
+                                                               animations:^{
+                                                                   for (UIView *view in _rateView.subviews)
+                                                                   {
+                                                                       if ([view tag] == 2)
+                                                                       {
+                                                                           [view setAlpha:1.0];
+                                                                           [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y-_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                                                                           break;
+                                                                       }
+                                                                   }
+                                                               }
+                                                               completion:^(BOOL finished) {
+                                                                   [UIView animateWithDuration:0.1 delay:0.0 options:0
+                                                                                    animations:^{
+                                                                                        for (UIView *view in _rateView.subviews)
+                                                                                        {
+                                                                                            if ([view tag] == 3)
+                                                                                            {
+                                                                                                [view setAlpha:1.0];
+                                                                                                [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y-_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                                                                                                break;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                    completion:^(BOOL finished) {
+                                                                                        [UIView animateWithDuration:0.1 delay:0.0 options:0
+                                                                                                         animations:^{
+                                                                                                             for (UIView *view in _rateView.subviews)
+                                                                                                             {
+                                                                                                                 if ([view tag] == 4)
+                                                                                                                 {
+                                                                                                                     [view setAlpha:1.0];
+                                                                                                                     [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y-_rateView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                                                                                                                     break;
+                                                                                                                 }
+                                                                                                             }
+                                                                                                         }
+                                                                                                         completion:^(BOOL finished) {
+                                                                                                             
+                                                                                                         }];
+                                                                                        [UIView commitAnimations];
+                                                                                    }];
+                                                                   [UIView commitAnimations];
+                                                               }];
+                                              [UIView commitAnimations];
+                                          }];
+                         [UIView commitAnimations];
+                     }];
+    [UIView commitAnimations];
+}
+
+-(void)hideRateView
+{
+    [UIView animateWithDuration:0.2 delay:0.0 options:0
+                     animations:^{
+                         for (UIView *view in _rateView.subviews)
+                         {
+                             [view setAlpha:0.0];
+                             [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y+_shareView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                         }
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.2 delay:0.0 options:0
+                                          animations:^{
+                                              [_rateView setAlpha:0.0];
+                                          }
+                                          completion:^(BOOL finished) {
+                                              for (UIView *view in _rateView.subviews)
+                                              {
+                                                  [view setAlpha:1.0];
+                                                  [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y-_shareView.frame.size.height, view.frame.size.width, view.frame.size.height)];
+                                              }
+                                              [_rateView removeFromSuperview];
+                                              [self openSearch:nil];
+                                          }];
+                         [UIView commitAnimations];
+                     }];
+    [UIView commitAnimations];
+}
+
 -(void)showTableView
 {
-    
-    
     [Chartboost showInterstitial:CBLocationItemStore];
 
     if (isTableVisible)return;
@@ -1335,7 +1527,6 @@ applicationActivities:nil];
 }
 
 
-
 #pragma mark Banner Ad delegate
 
 -(BOOL)bannerViewActionShouldBegin:(ADBannerView *)banner willLeaveApplication:(BOOL)willLeave{
@@ -1425,7 +1616,6 @@ applicationActivities:nil];
 {
     NSLog(@"%@",@"SSS");
 }
-
 
 #pragma mark Link
 
@@ -1605,7 +1795,6 @@ applicationActivities:nil];
     
     
 }
-
 
 - (void)revmobSessionIsStarted {
     NSLog(@"[RevMob Sample App] Session started with delegate.");

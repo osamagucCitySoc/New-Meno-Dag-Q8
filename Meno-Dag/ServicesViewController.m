@@ -21,7 +21,6 @@
     int buyInt;
     NSString* phonePartSearch1;
     NSString* nameSearch1;
-    __weak IBOutlet UIActivityIndicatorView *loader;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -51,9 +50,64 @@
     phonePartSearch1 = @"phonePartSearch";
     nameSearch1 = @"nameSearch";
     
-    [loader setAlpha:1.0];
+    [self addActivityView];
     
     [self reload];
+}
+
+-(void)addActivityView
+{
+    for (UIView *view in [self.navigationController view].subviews)
+    {
+        if (view.tag == 383)
+        {
+            [view removeFromSuperview];
+            break;
+        }
+    }
+    
+    UIView *mainActionView;
+    
+    if (([UIApplication sharedApplication].statusBarOrientation == 3 || [UIApplication sharedApplication].statusBarOrientation == 4) && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
+        mainActionView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.height, [[UIScreen mainScreen] bounds].size.width)];
+    }
+    else
+    {
+        mainActionView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
+    }
+    
+    mainActionView.tag = 383;
+    
+    [mainActionView setBackgroundColor:[UIColor colorWithRed:0.0/255 green:0.0/255 blue:0.0/255 alpha:0.8]];
+    
+    [[self.navigationController view]addSubview:mainActionView];
+    
+    UIImageView *actImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loading-icon.png"]];
+    
+    [actImg setFrame:CGRectMake(0, 0, 120, 120)];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+    animation.fromValue = [NSNumber numberWithFloat:1.0f];
+    animation.toValue = [NSNumber numberWithFloat: 999];
+    animation.duration = 170.5f;
+    [actImg.layer addAnimation:animation forKey:@"MyAnimation"];
+    
+    actImg.center = mainActionView.center;
+    
+    [mainActionView addSubview:actImg];
+}
+
+-(void)removeActivityView
+{
+    for (UIView *view in [self.navigationController view].subviews)
+    {
+        if (view.tag == 383)
+        {
+            [view removeFromSuperview];
+            break;
+        }
+    }
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -87,7 +141,7 @@
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         _blockPriceText.text = [NSString stringWithFormat:@"%.02f",product.price.floatValue];
-                        loader.alpha = 0;
+                        [self removeActivityView];
                     });
                 }else if([ss rangeOfString:@"11"].location != NSNotFound)
                 {
@@ -151,6 +205,8 @@
         }
         [store synchronize];
     }
+    
+    [self removeActivityView];
 }
 
 - (IBAction)blockClicked:(id)sender {
@@ -169,7 +225,7 @@
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [loader setAlpha:1.0];
+        [self addActivityView];
     });
     buyInt = 1;
     SKProduct *product = products[buyInt];
@@ -185,7 +241,7 @@
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [loader setAlpha:1.0];
+        [self addActivityView];
     });
     buyInt = 3;
     SKProduct *product = products[buyInt];
@@ -200,7 +256,7 @@
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [loader setAlpha:1.0];
+        [self addActivityView];
     });
     buyInt = 0;
     SKProduct *product = products[buyInt];
@@ -217,7 +273,7 @@
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [loader setAlpha:1.0];
+        [self addActivityView];
     });
     buyInt = 2;
     SKProduct *product = products[buyInt];
@@ -249,7 +305,7 @@
                     }
                     [store synchronize];
                     dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        [loader setAlpha:0.0];
+                        [self removeActivityView];
                         [alert show];
                     });
                 }if([ss rangeOfString:@"22"].location != NSNotFound)
@@ -264,7 +320,7 @@
                     }
                     [store synchronize];
                     dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        [loader setAlpha:0.0];
+                        [self removeActivityView];
                         [alert show];
                     });
                 }if([ss rangeOfString:@"44"].location != NSNotFound)
@@ -326,7 +382,7 @@
                         
                         NSLog(@"%@",[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
                         dispatch_async(dispatch_get_main_queue(), ^(void) {
-                            [loader setAlpha:0.0];
+                            [self removeActivityView];
                             [alert show];
                         });
 
@@ -343,7 +399,7 @@
                     }
                     [store synchronize];
                     dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        [loader setAlpha:0.0];
+                        [self removeActivityView];
                         [alert show];
                     });
                 }
@@ -412,6 +468,9 @@
     }];
 }
 
+-(UIStatusBarStyle)preferredStatusBarStyle{
+    return UIStatusBarStyleLightContent;
+}
 
 #pragma mark alert view delegate
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex

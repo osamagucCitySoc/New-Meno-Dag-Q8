@@ -55,6 +55,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *versionLabel;
 @property (strong, nonatomic) IBOutlet UILabel *rightsLabel;
 @property (strong, nonatomic) IBOutlet UIToolbar *searchToolbar;
+@property (strong, nonatomic) IBOutlet UIView *rateView;
 
 @end
 

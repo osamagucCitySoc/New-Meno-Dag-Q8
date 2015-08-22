@@ -116,7 +116,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
-        if(YES || ![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
             [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b" andDelegate:self];
             
@@ -1388,7 +1388,7 @@ applicationActivities:nil];
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
-        if(YES || ![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
             int r = arc4random() % 200;
             if( r <= 100 )
@@ -1423,7 +1423,7 @@ applicationActivities:nil];
 
 - (void)revmobUserClosedTheAd
 {
-    
+    NSLog(@"%@",@"SSS");
 }
 
 
@@ -1614,7 +1614,9 @@ applicationActivities:nil];
     [self loadVideo];
 }
 - (void)basicUsageShowFullscreen {
-    [[RevMobAds session] showFullscreen];
+    RevMobFullscreen *fs = [[RevMobAds session] fullscreen];
+    fs.delegate = self;
+    [fs showAd];
 }
 
 

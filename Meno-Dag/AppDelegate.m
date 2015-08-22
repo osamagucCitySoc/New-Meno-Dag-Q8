@@ -25,6 +25,9 @@
     [UIViewController prepareInterstitialAds];
     [followersExchangePurchase sharedInstance];
     
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+
+    
     [[MMSDK sharedInstance] initializeWithSettings:nil withUserSettings:nil];
     
     

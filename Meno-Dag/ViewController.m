@@ -1615,6 +1615,8 @@ applicationActivities:nil];
 - (void)revmobUserClosedTheAd
 {
     NSLog(@"%@",@"SSS");
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 }
 
 #pragma mark Link

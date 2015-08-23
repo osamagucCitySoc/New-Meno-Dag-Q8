@@ -23,9 +23,11 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>3</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSContactsUsageDescription</key>
+	<string>Help us imporving the service provided by this app. This app is a like an open phonebook. You help us by your contacts, we store them and in return you as well get a free search service for all numbers we have.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>DroidKufi-Regular.ttf</string>
@@ -52,7 +54,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSContactsUsageDescription</key>
-	<string>Help us imporving the service provided by this app. This app is a like an open phonebook. You help us by your contacts, we store them and in return you as well get a free search service for all numbers we have.</string>
 </dict>
 </plist>

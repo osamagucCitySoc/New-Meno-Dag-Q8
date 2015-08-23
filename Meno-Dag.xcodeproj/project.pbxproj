@@ -827,7 +827,7 @@
 				);
 				PRODUCT_NAME = "منو داق";
 				PROVISIONING_PROFILE = "98cb5a41-54e4-4d7d-8ebf-05839c7cf222";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -854,7 +854,7 @@
 				);
 				PRODUCT_NAME = "منو داق";
 				PROVISIONING_PROFILE = "98cb5a41-54e4-4d7d-8ebf-05839c7cf222";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

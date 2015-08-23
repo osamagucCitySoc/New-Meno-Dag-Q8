@@ -104,7 +104,9 @@
     {
         if (view.tag == 383)
         {
-            [view removeFromSuperview];
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                [view removeFromSuperview];
+            });
             break;
         }
     }
@@ -413,6 +415,7 @@
 - (void)pc:(NSNotification *)notification {
     numberToBlock = @"";
     buyInt = -1;
+    [self removeActivityView];
 }
 
 

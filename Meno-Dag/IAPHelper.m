@@ -188,6 +188,7 @@ NSString *const IAPHelperProductFailedNotification = @"IAPHelperProductFailedNot
     NSLog(@"failedTransaction...");
     if (transaction.error.code != SKErrorPaymentCancelled)
     {
+        [[NSNotificationCenter defaultCenter] postNotificationName:IAPHelperProductFailedNotification object:transaction.originalTransaction.payment.productIdentifier userInfo:nil];
         NSLog(@"Transaction error: %@", transaction.error.localizedDescription);
     }else
     {

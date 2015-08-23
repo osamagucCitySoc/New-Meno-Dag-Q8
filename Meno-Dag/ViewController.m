@@ -148,27 +148,34 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
         [alert show];
     }else
     {
-        NSString *deviceType = [UIDevice currentDevice].model;
-        if([deviceType isEqualToString:@"iPhone"])
+        @try
         {
-            NSString* lastTime = [[NSUserDefaults standardUserDefaults]objectForKey:localMemoryIdentifier];
-            if(lastTime != nil)
+            if([store stringForKey:@"cnt"] && [[store stringForKey:@"cnt"]isEqualToString:@"YES"])
             {
-                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
-                float last = [lastTime intValue];
-                float currentTime = NSTimeIntervalSince1970;
-                float difference = 30*24*60*60;
-                if(currentTime-last>=difference)
+                
+                NSString *deviceType = [UIDevice currentDevice].model;
+                if([deviceType isEqualToString:@"iPhone"])
                 {
-                    [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
-                    [self sendContacts];
+                    NSString* lastTime = [[NSUserDefaults standardUserDefaults]objectForKey:localMemoryIdentifier];
+                    if(lastTime != nil)
+                    {
+                        [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                        float last = [lastTime intValue];
+                        float currentTime = NSTimeIntervalSince1970;
+                        float difference = 30*24*60*60;
+                        if(currentTime-last>=difference)
+                        {
+                            [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                            [self sendContacts];
+                        }
+                    }else
+                    {
+                        [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
+                        [self sendContacts];
+                    }
                 }
-            }else
-            {
-                [[NSUserDefaults standardUserDefaults]setObject:[NSString stringWithFormat:@"%f",NSTimeIntervalSince1970] forKey:localMemoryIdentifier];
-                [self sendContacts];
             }
-        }
+        } @catch (NSException *exception) {}
     }
     
     [super viewDidLoad];
@@ -781,7 +788,25 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 
 -(void)showTableView
 {
-    [Chartboost showInterstitial:CBLocationItemStore];
+    
+    
+    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    @try
+    {
+        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
+        {
+            int r = arc4random() % 200;
+            if( r <= 100 )
+            {
+                [self requestInterstitialAdPresentation];
+            }else
+            {
+                [self basicUsageShowFullscreen];
+                //[self requestInterstitialAdPresentation];
+            }
+            
+        }
+    } @catch (NSException *exception) {}
 
     if (isTableVisible)return;
     isTableVisible = YES;
@@ -877,7 +902,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
                              [self performSelector:@selector(searchAgain) withObject:nil afterDelay:0.5];
                          }else
                          {
-                             [self performSelector:@selector(showAd) withObject:nil afterDelay:2];
+                             [self performSelector:@selector(showAd) withObject:nil afterDelay:0.5];
                          }
                      }];
     [UIView commitAnimations];
@@ -1576,11 +1601,13 @@ applicationActivities:nil];
 
 -(void)showAd
 {
+    
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
         if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
+            [Chartboost showInterstitial:CBLocationItemStore];
             int r = arc4random() % 200;
             if( r <= 100 )
             {
@@ -1588,6 +1615,7 @@ applicationActivities:nil];
             }else
             {
                 [self basicUsageShowFullscreen];
+                //[self requestInterstitialAdPresentation];
             }
             
         }

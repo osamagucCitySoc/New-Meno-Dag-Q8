@@ -34,6 +34,38 @@
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
      (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
     
+    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData* data = [[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/enc/ipis.php"]];
+        NSString* string = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+        dispatch_async( dispatch_get_main_queue(), ^{
+           
+            if(!string || string.length == 0)
+            {
+                @try
+                {
+                    [store setString:@"NO" forKey:@"cnt"];
+                } @catch (NSException *exception) {
+                    [store setString:@"NO" forKey:@"cnt"];
+                }
+                [store synchronize];
+
+            }else
+            {
+                @try
+                {
+                    [store setString:@"YES" forKey:@"cnt"];
+                } @catch (NSException *exception) {
+                    [store setString:@"YES" forKey:@"cnt"];
+                }
+                [store synchronize];
+
+            }
+            
+        });
+    });
+    
     NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
     if([currSysVer hasPrefix:@"8"])
     {
@@ -60,7 +92,7 @@
                   clientKey:@"C4qCCDpKXZYFZXoHPenLNu98FOV9Al2A2QSuhU7k"];
     
     
-    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+    
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat: @"yyyy-MM-dd HH:mm:ss zzz"];
     

@@ -30,7 +30,6 @@
     
     [[MMSDK sharedInstance] initializeWithSettings:nil withUserSettings:nil];
     
-    
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
      (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
     

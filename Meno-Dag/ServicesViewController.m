@@ -328,14 +328,24 @@
                 }if([ss rangeOfString:@"44"].location != NSNotFound)
                 {
                     
+                    NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                    NSMutableString *randomString = [NSMutableString stringWithCapacity: 50];
+                    
+                    for (int i=0; i<50; i++) {
+                        [randomString appendFormat: @"%hu", [letters characterAtIndex: arc4random_uniform([letters length])]];
+                    }
+                    
+                    
+                    numberToBlock= [numberToBlock stringByAppendingFormat:@"#%@",randomString];
+                    
                     NSData *data = [numberToBlock dataUsingEncoding:NSUTF8StringEncoding];
                     
                     // base 64
                     numberToBlock = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-
+                    
                     //salt
                     numberToBlock = [numberToBlock stringByAppendingString:[numberToBlock substringFromIndex:[numberToBlock length] - 1]];
-
+                    
                     //opp
                     NSMutableString *reversedString = [NSMutableString string];
                     NSInteger charIndex = [numberToBlock length];
@@ -352,7 +362,7 @@
                     NSString* ch2 = [encryptedSources substringWithRange:NSMakeRange(8, 1)];
                     encryptedSources = [encryptedSources stringByReplacingCharactersInRange:NSMakeRange(4, 1) withString:ch2];
                     encryptedSources = [encryptedSources stringByReplacingCharactersInRange:NSMakeRange(8, 1) withString:ch1];
-
+                    
                     // 10 19
                     ch1 = [encryptedSources substringWithRange:NSMakeRange(10, 1)];
                     ch2 = [encryptedSources substringWithRange:NSMakeRange(19, 1)];
@@ -364,6 +374,8 @@
                     ch2 = [encryptedSources substringWithRange:NSMakeRange(20, 1)];
                     encryptedSources = [encryptedSources stringByReplacingCharactersInRange:NSMakeRange(1, 1) withString:ch2];
                     encryptedSources = [encryptedSources stringByReplacingCharactersInRange:NSMakeRange(20, 1) withString:ch1];
+                    
+
 
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/encMOH/blockIt.php"]];

@@ -45,7 +45,7 @@
 {
     [super viewDidLoad];
     
-    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width, 956);
+    _scrollView.contentSize = CGSizeMake(self.view.frame.size.width, 800);
     
     phonePartSearch1 = @"phonePartSearch";
     nameSearch1 = @"nameSearch";
@@ -171,7 +171,7 @@
     followersExchangePurchase *inAppPurchaseHelper = [followersExchangePurchase sharedInstance];
     [inAppPurchaseHelper restoreCompletedTransactions];
     
-    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDag.11"]){
+    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDagGold.11"]){
         UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
         
         @try
@@ -184,7 +184,7 @@
 
     }
     
-    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDag.22"]){
+    if ([inAppPurchaseHelper productPurchased:@"arabdevs.menoDagGold.22"]){
         UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
         
         @try

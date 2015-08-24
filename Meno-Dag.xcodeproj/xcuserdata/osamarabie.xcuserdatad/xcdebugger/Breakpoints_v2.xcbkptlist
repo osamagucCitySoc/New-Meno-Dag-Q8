@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Meno-Dag/ViewController.m"
-            timestampString = "462052422.28063"
+            timestampString = "462144824.906594"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1451"
-            endingLineNumber = "1451"
-            landmarkName = "-tableView:didSelectRowAtIndexPath:"
+            startingLineNumber = "1688"
+            endingLineNumber = "1688"
+            landmarkName = "-interstitialDidReceiveAd:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

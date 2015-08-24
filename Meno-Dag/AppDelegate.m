@@ -9,7 +9,6 @@
 #import "AppDelegate.h"
 #import "followersExchangePurchase.h"
 #import <iAd/iAd.h>
-#import <MMAdSDK/MMAdSDK.h>
 #import <Parse/Parse.h>
 #import "UICKeyChainStore.h"
 
@@ -22,13 +21,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    [UIViewController prepareInterstitialAds];
     [followersExchangePurchase sharedInstance];
     
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 
-    
-    [[MMSDK sharedInstance] initializeWithSettings:nil withUserSettings:nil];
     
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
      (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
@@ -36,7 +32,7 @@
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     
     dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSData* data = [[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/enc/ipis.php"]];
+        NSData* data = [[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/encMOH/ipis.php"]];
         NSString* string = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
         dispatch_async( dispatch_get_main_queue(), ^{
            
@@ -75,15 +71,46 @@
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"numberOfNumbers"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     
-    NSInteger randomNumber = arc4random() % 1000;
     
-    [[MMSDK sharedInstance] initializeWithSettings:nil withUserSettings:nil];
     
-    if(randomNumber <= 10)
+    BOOL remoteNotificationsEnabled = false, noneEnabled,alertsEnabled, badgesEnabled, soundsEnabled;
+    
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+        // iOS8+
+        remoteNotificationsEnabled = [UIApplication sharedApplication].isRegisteredForRemoteNotifications;
+        
+        UIUserNotificationSettings *userNotificationSettings = [UIApplication sharedApplication].currentUserNotificationSettings;
+        
+        noneEnabled = userNotificationSettings.types == UIUserNotificationTypeNone;
+        alertsEnabled = userNotificationSettings.types & UIUserNotificationTypeAlert;
+        badgesEnabled = userNotificationSettings.types & UIUserNotificationTypeBadge;
+        soundsEnabled = userNotificationSettings.types & UIUserNotificationTypeSound;
+        
+    } else {
+        // iOS7 and below
+        UIRemoteNotificationType enabledRemoteNotificationTypes = [UIApplication sharedApplication].enabledRemoteNotificationTypes;
+        
+        noneEnabled = enabledRemoteNotificationTypes == UIRemoteNotificationTypeNone;
+        alertsEnabled = enabledRemoteNotificationTypes & UIRemoteNotificationTypeAlert;
+        badgesEnabled = enabledRemoteNotificationTypes & UIRemoteNotificationTypeBadge;
+        soundsEnabled = enabledRemoteNotificationTypes & UIRemoteNotificationTypeSound;
+    }
+    
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+        NSLog(@"Remote notifications enabled: %@", remoteNotificationsEnabled ? @"YES" : @"NO");
+    }
+    
+    if(badgesEnabled)
     {
-        [UIApplication sharedApplication].applicationIconBadgeNumber = 1;
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    
+        NSInteger randomNumber = arc4random() % 1000;
+    
+        if(randomNumber <= 10)
+        {
+            [UIApplication sharedApplication].applicationIconBadgeNumber = 1;
+        }
     }
 
     
@@ -187,5 +214,91 @@
 }
 #endif
 
+
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSLog(@"Calling Application Bundle ID: %@", sourceApplication);
+    NSLog(@"URL scheme:%@", [url scheme]);
+    NSLog(@"URL query: %@", [url query]);
+    
+    
+    if([url query])
+    {
+        NSString * encryptedSources = [[[[url query] componentsSeparatedByString:@"="] objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/encMOH/validateTokens.php"]];
+            
+            // Specify that it will be a POST request
+            request.HTTPMethod = @"POST";
+            
+            // This is how we set header fields
+            [request setValue:@"application/x-www-form-urlencoded; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+            
+            // Convert your data and set your request's HTTPBody property
+            NSString *stringData = [NSString stringWithFormat:@"phone=%@", encryptedSources];
+            NSData *requestBodyData = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+            request.HTTPBody = requestBodyData;
+            
+            NSData *response = [NSURLConnection sendSynchronousRequest:request
+                                                     returningResponse:nil error:nil];
+            
+            NSLog(@"%@",[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                NSString* type = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+                
+                NSString* message = @"";
+                
+                if([type isEqualToString:@"3"])
+                {
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    @try
+                    {
+                        [[store stringForKey:@"nameSearch"]isEqualToString:@"YES"];
+                        [[store stringForKey:@"phonePartSearch"]isEqualToString:@"YES"];
+                    } @catch (NSException *exception) {
+                        [[store stringForKey:@"nameSearch"]isEqualToString:@"YES"];
+                        [[store stringForKey:@"phonePartSearch"]isEqualToString:@"YES"];
+                    }
+                    message = @"تم إستعادة البحث بالإسم و جزء من الرقم";
+                }else if([type isEqualToString:@"2"])
+                {
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    @try
+                    {
+                        [[store stringForKey:@"phonePartSearch"]isEqualToString:@"YES"];
+                    } @catch (NSException *exception) {
+                        [[store stringForKey:@"phonePartSearch"]isEqualToString:@"YES"];
+                    }
+                    message = @"تم إستعادة جزء من الرقم";
+                }else if([type isEqualToString:@"1"])
+                {
+                    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
+                    @try
+                    {
+                        [[store stringForKey:@"nameSearch"]isEqualToString:@"YES"];
+                    } @catch (NSException *exception) {
+                        [[store stringForKey:@"nameSearch"]isEqualToString:@"YES"];
+                    }
+                    message = @"تم إستعادة البحث";
+                }else
+                {
+                    message = type;
+                }
+                    
+                UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"نتيجة عملية النقل" message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [alert show];
+                
+            });
+            
+        });
+
+    }
+    
+    return YES;
+}
 
 @end

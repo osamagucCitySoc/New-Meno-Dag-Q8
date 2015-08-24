@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
-#import <RevMobAds/RevMobAds.h>
-#import <RevMobAds/RevMobAdsDelegate.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreLocation/CoreLocation.h>
 
@@ -25,7 +23,7 @@
 }
 
 
-@property (nonatomic, retain) RevMobFullscreen *video;
+
 @property (strong, nonatomic) IBOutlet UITextField *searchTextField;
 @property (strong, nonatomic) IBOutlet UIImageView *largePhoneIcon;
 @property (strong, nonatomic) IBOutlet UILabel *selectBack;

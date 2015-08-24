@@ -10,23 +10,20 @@
 #import "UICKeyChainStore.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <AdSupport/AdSupport.h>
-#import <iAd/iAd.h>
-#import <MMAdSDK/MMAdSDK.h>
-#import <RevMobAds/RevMobAds.h>
-#import <RevMobAds/RevMobAdsDelegate.h>
 #import <AddressBookUI/AddressBookUI.h>
 #import <AddressBook/AddressBook.h>
-#import <Chartboost/Chartboost.h>
+@import GoogleMobileAds;
 
 #define APP_URL @"https://goo.gl/16BAbd"
 #define SHARE_MSG @"تطبيق منو داق لمعرفة هوية المتصل من خلال الرقم أو الإسم"
 
-@interface ViewController ()<ADBannerViewDelegate,MMInterstitialDelegate,RevMobAdsDelegate,ChartboostDelegate>
+@interface ViewController ()<GADInterstitialDelegate>
 {
     NSString *currentName,*currentNumber;
 }
-@property (nonatomic, strong)RevMobFullscreen *fullscreen;
-@property (nonatomic, strong)RevMobAdLink *link;
+@property (strong, nonatomic) IBOutlet GADBannerView  *bannerVieww;
+@property(nonatomic, strong) GADInterstitial *interstitial;
+
 @end
 
 
@@ -35,24 +32,15 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 
 @implementation ViewController
 {
- 
-    ADInterstitialAd *interstitial;
-    BOOL requestingAd;
-    __weak IBOutlet ADBannerView *adBanner;
-    MMInterstitialAd *interstitialAd;
+    
+    __weak IBOutlet UIView *bannerView;
 }
 
-@synthesize video;
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [Chartboost startWithAppId:@"53ca57cc89b0bb41583af870" appSignature:@"703f9dc7647925bbc3553213bbaa92183ef97e1c" delegate:self];
-    
-    [Chartboost cacheRewardedVideo:CBLocationHomeScreen];
-    [Chartboost cacheMoreApps:CBLocationHomeScreen];
-
-    requestingAd = NO;
     
     savedLogNames = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNames"]];
     savedLogNumbers = [[NSMutableArray alloc] initWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"logNumbers"]];
@@ -111,30 +99,14 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     [self performSelector:@selector(startAll) withObject:nil afterDelay:0.5];
     [self performSelector:@selector(checkRate) withObject:nil afterDelay:3.0];
     
-    adBanner.alpha = 0.0;
+    
     
     UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
     @try
     {
         if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
         {
-            [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b" andDelegate:self];
             
-            /*[RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
-                          withSuccessHandler:^{
-                              [[RevMobAds session] showBanner];
-                              [[RevMobAds session]showFullscreen];
-                          } andFailHandler:^(NSError *error) {
-                              NSLog(@"Session failed to start with block");
-                          }];*/
-            
-            
-            self.interstitialPresentationPolicy = ADInterstitialPresentationPolicyManual;
-            
-            
-            adBanner.delegate = self;
-            adBanner.alpha = 0.0;
-          
         }
     } @catch (NSException *exception) {}
     
@@ -177,6 +149,27 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
             }
         } @catch (NSException *exception) {}
     }
+    
+    
+    CGPoint center = bannerView.center;
+    center.x = self.view.center.x;
+    [bannerView setCenter:center];
+    
+    self.bannerVieww = [[GADBannerView alloc]initWithAdSize:GADAdSizeFromCGSize(GAD_SIZE_300x250)];
+    self.bannerVieww.adUnitID = @"ca-app-pub-2433238124854818/9596157193";
+    self.bannerVieww.rootViewController = self;
+    GADRequest* request = [[GADRequest alloc]init];
+    request.testDevices = @[ kGADSimulatorID ];
+    [self.bannerVieww loadRequest:request];
+    [bannerView addSubview:self.bannerVieww];
+    
+    
+    self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:@"ca-app-pub-2433238124854818/6363489197"];
+    [self.interstitial setDelegate:self];
+    GADRequest *requestt = [GADRequest request];
+    requestt.testDevices = @[kGADSimulatorID];
+    [self.interstitial loadRequest:requestt];
+    
     
     [super viewDidLoad];
 }
@@ -246,24 +239,6 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     }
 }
 
--(void)iad
-{
-    int r = arc4random() % 200;
-    
-    if(r <= 100)
-    {
-        [RevMobAds startSessionWithAppID:@"53ca553deee830d806f5da9b"
-                      withSuccessHandler:^{
-                          [[RevMobAds session] showFullscreen];
-                      } andFailHandler:^(NSError *error) {
-                          NSLog(@"Session failed to start with block");
-                      }];
-
-    }else
-    {
-        [self requestInterstitialAdPresentation];
-    }
-}
 
 -(void)startAll
 {
@@ -444,7 +419,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
     NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[post length]];
     
-    NSURL *url = [NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/enc/getNames.php"];
+    NSURL *url = [NSURL URLWithString:@"http://osamalogician.com/arabDevs/menoDag/encMOH/getNames.php"];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:90.0];
     [request setHTTPMethod:@"POST"];
     
@@ -790,24 +765,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
 {
     
     
-    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
-    @try
-    {
-        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
-        {
-            int r = arc4random() % 200;
-            if( r <= 100 )
-            {
-                [self requestInterstitialAdPresentation];
-            }else
-            {
-                [self basicUsageShowFullscreen];
-                //[self requestInterstitialAdPresentation];
-            }
-            
-        }
-    } @catch (NSException *exception) {}
-
+   
     if (isTableVisible)return;
     isTableVisible = YES;
     
@@ -870,6 +828,9 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     if (!isTableVisible)return;
     isTableVisible = NO;
     
+    
+    
+    
     float theHight = 0;
     
     for (UIView *view in self.view.subviews)
@@ -902,7 +863,7 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
                              [self performSelector:@selector(searchAgain) withObject:nil afterDelay:0.5];
                          }else
                          {
-                             [self performSelector:@selector(showAd) withObject:nil afterDelay:0.5];
+                             [self performSelector:@selector(showAd) withObject:nil afterDelay:1.0];
                          }
                      }];
     [UIView commitAnimations];
@@ -911,6 +872,15 @@ NSString* localMemoryIdentifier = @"LastTimeUploaded";
     {
         [self openSearch:nil];
     }
+}
+
+-(void)showAd
+{
+    self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:@"ca-app-pub-2433238124854818/6363489197"];
+    [self.interstitial setDelegate:self];
+    GADRequest *requestt = [GADRequest request];
+    requestt.testDevices = @[kGADSimulatorID];
+    [self.interstitial loadRequest:requestt];
 }
 
 -(void)searchAgain
@@ -1552,120 +1522,6 @@ applicationActivities:nil];
 }
 
 
-#pragma mark Banner Ad delegate
-
--(BOOL)bannerViewActionShouldBegin:(ADBannerView *)banner willLeaveApplication:(BOOL)willLeave{
-    NSLog(@"Ad Banner action is about to begin.");
-    
-    return YES;
-}
-
--(void)bannerViewDidLoadAd:(ADBannerView *)banner{
-    NSLog(@"Ad Banner did load ad.");
-    
-    // Show the ad banner.
-    [UIView animateWithDuration:0.5 animations:^{
-        if(banner == adBanner)
-        {
-            adBanner.alpha = 1.0;
-        }
-    }];
-}
-
--(void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error{
-    NSLog(@"Unable to show ads. Error: %@", [error localizedDescription]);
-    [UIView animateWithDuration:0.5 animations:^{
-        if(banner == adBanner)
-        {
-            adBanner.alpha = 0.0;
-        }
-    }];
-}
-
-#pragma MM delegate
-- (void)showInterstitialAd {
-    if (interstitialAd.ready) {
-        [interstitialAd showFromViewController:self];
-    }
-}
--(void)interstitialAdLoadDidSucceed:(MMInterstitialAd*)ad
-{
-    [self showInterstitialAd];
-}
-
--(void)interstitialAd:(MMInterstitialAd*)ad loadDidFailWithError:(NSError*)error
-{
-    NSLog(@"%@",[error debugDescription]);
-}
-
-
--(void)showAd
-{
-    
-    UICKeyChainStore* store = [UICKeyChainStore keyChainStore];
-    @try
-    {
-        if(![store stringForKey:@"adsEnd"] || ![store stringForKey:@"ads"] || [[store stringForKey:@"ads"]isEqualToString:@"NO"])
-        {
-            [Chartboost showInterstitial:CBLocationItemStore];
-            int r = arc4random() % 200;
-            if( r <= 100 )
-            {
-                [self requestInterstitialAdPresentation];
-            }else
-            {
-                [self basicUsageShowFullscreen];
-                //[self requestInterstitialAdPresentation];
-            }
-            
-        }
-    } @catch (NSException *exception) {}
-
-   }
-
-
-#pragma mark - <MPAdViewDelegate>
-- (UIViewController *)viewControllerForPresentingModalView {
-    return self;
-}
-
--(void) loadVideo {
-    self.fullscreen = [[RevMobAds session] fullscreen];
-    self.fullscreen.delegate = self;
-    [self.fullscreen loadVideo];
-}
-
-- (void)revmobVideoDidLoad
-{
-    
-}
-
-- (void)revmobUserClosedTheAd
-{
-    NSLog(@"%@",@"SSS");
-    
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
-}
-
-#pragma mark Link
-
-- (void)loadAdLink {
-    self.link = [[RevMobAds session] adLink];
-    [self.link loadWithSuccessHandler:^(RevMobAdLink *link) {
-        [self revmobAdDidReceive];
-    } andLoadFailHandler:^(RevMobAdLink *link, NSError *error) {
-        [self revmobAdDidFailWithError:error];
-    }];
-}
-
-- (void)openLoadedAdLink {
-    if (self.link) [self.link openLink];
-}
-
-- (void)openAdLink {
-    [[RevMobAds session] openLink];
-}
-
 
 
 #pragma mark - alert delegate
@@ -1775,7 +1631,7 @@ applicationActivities:nil];
                 NSData *postData = [urlString dataUsingEncoding:NSUTF8StringEncoding
                                            allowLossyConversion:YES];
                 NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
-                NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/enc/store.php";
+                NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/encMOH/store.php";
                 
                 NSURL *url = [NSURL URLWithString:baseurl];
                 NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
@@ -1802,7 +1658,7 @@ applicationActivities:nil];
         NSData *postData = [urlString dataUsingEncoding:NSUTF8StringEncoding
                                    allowLossyConversion:YES];
         NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
-        NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/enc/store.php";
+        NSString *baseurl = @"http://osamalogician.com/arabDevs/menoDag/encMOH/store.php";
         
         NSURL *url = [NSURL URLWithString:baseurl];
         NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:url];
@@ -1826,16 +1682,10 @@ applicationActivities:nil];
     
 }
 
-- (void)revmobSessionIsStarted {
-    NSLog(@"[RevMob Sample App] Session started with delegate.");
-    [self basicUsageShowFullscreen];
-    [[RevMobAds session]showBanner];
-    [self loadVideo];
-}
-- (void)basicUsageShowFullscreen {
-    RevMobFullscreen *fs = [[RevMobAds session] fullscreen];
-    fs.delegate = self;
-    [fs showAd];
+#pragma mark interstial delegate
+- (void)interstitialDidReceiveAd:(GADInterstitial *)ad
+{
+    [self.interstitial presentFromRootViewController:self];
 }
 
 

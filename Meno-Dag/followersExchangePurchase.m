@@ -16,10 +16,9 @@
     
     dispatch_once(&once, ^{
         NSSet * productIdentifiers = [NSSet setWithObjects:
-                                      @"arabdevs.menoDag.11",
-                                      @"arabdevs.menoDag.22",
-                                      @"arabdevs.menoDag.44",
-                                      @"arabdevs.menoDag.55",
+                                      @"arabdevs.menoDagGold.11",
+                                      @"arabdevs.menoDagGold.22",
+                                      @"arabdevs.menoDagGold.44",
                                       nil];
         sharedInstance = [[self alloc] initWithProductIdentifiers:productIdentifiers];
     });
